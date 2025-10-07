@@ -1,11 +1,6 @@
-import React from 'react';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { Pie } from 'react-chartjs-2';
+import React from "react";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Pie } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -15,8 +10,8 @@ interface PieChartProps {
     datasets: {
       label: string;
       data: number[];
-      backgroundColor?: string[];
-      borderColor?: string[];
+      backgroundColor?: string | string[];
+      borderColor?: string | string[];
       borderWidth?: number;
     }[];
   };
@@ -34,14 +29,14 @@ export const PieChart: React.FC<PieChartProps> = ({
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'bottom' as const,
+        position: "bottom" as const,
       },
       title: {
         display: !!title,
         text: title,
         font: {
           size: 16,
-          weight: 'bold' as const,
+          weight: "bold" as const,
         },
       },
     },

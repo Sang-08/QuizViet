@@ -1,45 +1,56 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Camera, 
-  Save, 
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  User,
+  Mail,
+  Phone,
+  Camera,
+  Save,
   ArrowLeft,
   Eye,
-  EyeOff
-} from 'lucide-react';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { storage } from '../../libs/storage';
+  EyeOff,
+} from "lucide-react";
+import { Button } from "../../components/common/Button";
+import { Input } from "../../components/common/Input";
+import { TopNavbar } from "../../components/layout/TopNavbar";
+import { Footer } from "../../components/layout/Footer";
+import { storage } from "../../libs/storage";
 
-const profileSchema = z.object({
-  fullName: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự'),
-  email: z.string().email('Email không hợp lệ'),
-  phone: z.string().optional(),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().optional(),
-  confirmPassword: z.string().optional(),
-}).refine((data) => {
-  if (data.newPassword && !data.currentPassword) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Cần nhập mật khẩu hiện tại để đổi mật khẩu',
-  path: ['currentPassword'],
-}).refine((data) => {
-  if (data.newPassword && data.newPassword !== data.confirmPassword) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Mật khẩu xác nhận không khớp',
-  path: ['confirmPassword'],
-});
+const profileSchema = z
+  .object({
+    fullName: z.string().min(2, "Họ tên phải có ít nhất 2 ký tự"),
+    email: z.string().email("Email không hợp lệ"),
+    phone: z.string().optional(),
+    currentPassword: z.string().optional(),
+    newPassword: z.string().optional(),
+    confirmPassword: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.newPassword && !data.currentPassword) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Cần nhập mật khẩu hiện tại để đổi mật khẩu",
+      path: ["currentPassword"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.newPassword && data.newPassword !== data.confirmPassword) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Mật khẩu xác nhận không khớp",
+      path: ["confirmPassword"],
+    }
+  );
 
 type ProfileForm = z.infer<typeof profileSchema>;
 
@@ -56,9 +67,9 @@ export default function Profile() {
   } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      fullName: user?.name || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
+      fullName: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
     },
   });
 
@@ -66,11 +77,11 @@ export default function Profile() {
     setIsLoading(true);
     try {
       // TODO: Call update profile API
-      console.log('Update profile:', data);
-      
+      console.log("Update profile:", data);
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Update local storage
       const updatedUser = {
         ...user,
@@ -79,11 +90,11 @@ export default function Profile() {
         phone: data.phone,
       };
       storage.setUser(updatedUser);
-      
+
       // TODO: Show success message
-      console.log('Profile updated successfully');
+      console.log("Profile updated successfully");
     } catch (error) {
-      console.error('Update profile error:', error);
+      console.error("Update profile error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -91,11 +102,12 @@ export default function Profile() {
 
   const handleAvatarChange = () => {
     // TODO: Implement avatar upload
-    console.log('Change avatar');
+    console.log("Change avatar");
   };
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-secondary-50 flex flex-col">
+      <TopNavbar />
       {/* Header */}
       <div className="bg-white border-b border-secondary-200">
         <div className="container mx-auto px-6 py-6">
@@ -108,7 +120,9 @@ export default function Profile() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-secondary-900">Cài đặt tài khoản</h1>
+              <h1 className="text-2xl font-bold text-secondary-900">
+                Cài đặt tài khoản
+              </h1>
               <p className="text-secondary-600">Quản lý thông tin cá nhân</p>
             </div>
           </div>
@@ -146,13 +160,13 @@ export default function Profile() {
                   <h3 className="text-lg font-semibold text-secondary-900">
                     Thông tin cơ bản
                   </h3>
-                  
+
                   <Input
                     label="Họ và tên"
                     placeholder="Nhập họ và tên"
                     icon={<User size={16} />}
                     error={errors.fullName?.message}
-                    {...register('fullName')}
+                    {...register("fullName")}
                   />
 
                   <Input
@@ -161,7 +175,7 @@ export default function Profile() {
                     placeholder="Nhập email"
                     icon={<Mail size={16} />}
                     error={errors.email?.message}
-                    {...register('email')}
+                    {...register("email")}
                   />
 
                   <Input
@@ -170,7 +184,7 @@ export default function Profile() {
                     placeholder="Nhập số điện thoại"
                     icon={<Phone size={16} />}
                     error={errors.phone?.message}
-                    {...register('phone')}
+                    {...register("phone")}
                   />
                 </div>
 
@@ -190,7 +204,7 @@ export default function Profile() {
                     icon={<Eye size={16} />}
                     showPasswordToggle
                     error={errors.currentPassword?.message}
-                    {...register('currentPassword')}
+                    {...register("currentPassword")}
                   />
 
                   <Input
@@ -200,7 +214,7 @@ export default function Profile() {
                     icon={<Eye size={16} />}
                     showPasswordToggle
                     error={errors.newPassword?.message}
-                    {...register('newPassword')}
+                    {...register("newPassword")}
                   />
 
                   <Input
@@ -210,7 +224,7 @@ export default function Profile() {
                     icon={<Eye size={16} />}
                     showPasswordToggle
                     error={errors.confirmPassword?.message}
-                    {...register('confirmPassword')}
+                    {...register("confirmPassword")}
                   />
                 </div>
 
@@ -223,14 +237,17 @@ export default function Profile() {
                     <div className="flex justify-between">
                       <span className="text-secondary-600">Vai trò:</span>
                       <span className="font-medium text-secondary-900">
-                        {user?.role === 'Teacher' ? 'Giáo viên' : 
-                         user?.role === 'Student' ? 'Học sinh' : 'Quản trị viên'}
+                        {user?.role === "Teacher"
+                          ? "Giáo viên"
+                          : user?.role === "Student"
+                          ? "Học sinh"
+                          : "Quản trị viên"}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-secondary-600">Ngày tạo:</span>
                       <span className="font-medium text-secondary-900">
-                        {new Date().toLocaleDateString('vi-VN')}
+                        {new Date().toLocaleDateString("vi-VN")}
                       </span>
                     </div>
                   </div>
@@ -250,7 +267,9 @@ export default function Profile() {
                     loading={isLoading}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Đang lưu...' : (
+                    {isLoading ? (
+                      "Đang lưu..."
+                    ) : (
                       <>
                         <Save className="w-4 h-4 mr-2" />
                         Lưu thay đổi
@@ -263,6 +282,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

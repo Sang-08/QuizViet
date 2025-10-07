@@ -1,44 +1,53 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { 
-  Plus, 
-  Trash2, 
-  Save, 
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Plus,
+  Trash2,
+  Save,
   ArrowLeft,
   BookOpen,
   Clock,
   Target,
   Eye,
-  EyeOff
-} from 'lucide-react';
-import { Button } from '../../../components/common/Button';
-import { Input } from '../../../components/common/Input';
-import { Modal } from '../../../components/common/Modal';
-import { CreateQuizRequest } from '../../../types/quiz';
-import { apiClient } from '../../../libs/apiClient';
-import { mockAdapter } from '../../../mocks/adapter';
+  EyeOff,
+} from "lucide-react";
+import { Button } from "../../../components/common/Button";
+import { Input } from "../../../components/common/Input";
+import { Modal } from "../../../components/common/Modal";
+import { TopNavbar } from "../../../components/layout/TopNavbar";
+import { Footer } from "../../../components/layout/Footer";
+import { CreateQuizRequest } from "../../../types/quiz";
+import { apiClient } from "../../../libs/apiClient";
+import { mockAdapter } from "../../../mocks/adapter";
 
 const questionSchema = z.object({
-  content: z.string().min(5, 'Nội dung câu hỏi phải có ít nhất 5 ký tự'),
-  questionType: z.enum(['MultipleChoice', 'TrueFalse', 'FillInBlank']),
-  timeLimit: z.number().min(10, 'Thời gian tối thiểu 10 giây').max(300, 'Thời gian tối đa 300 giây'),
-  points: z.number().min(1, 'Điểm tối thiểu 1').max(100, 'Điểm tối đa 100'),
-  options: z.array(z.object({
-    content: z.string().min(1, 'Nội dung đáp án không được để trống'),
-    isCorrect: z.boolean(),
-  })).min(2, 'Phải có ít nhất 2 đáp án'),
+  content: z.string().min(5, "Nội dung câu hỏi phải có ít nhất 5 ký tự"),
+  questionType: z.enum(["MultipleChoice", "TrueFalse", "FillInBlank"]),
+  timeLimit: z
+    .number()
+    .min(10, "Thời gian tối thiểu 10 giây")
+    .max(300, "Thời gian tối đa 300 giây"),
+  points: z.number().min(1, "Điểm tối thiểu 1").max(100, "Điểm tối đa 100"),
+  options: z
+    .array(
+      z.object({
+        content: z.string().min(1, "Nội dung đáp án không được để trống"),
+        isCorrect: z.boolean(),
+      })
+    )
+    .min(2, "Phải có ít nhất 2 đáp án"),
 });
 
 const quizSchema = z.object({
-  title: z.string().min(3, 'Tiêu đề phải có ít nhất 3 ký tự'),
+  title: z.string().min(3, "Tiêu đề phải có ít nhất 3 ký tự"),
   description: z.string().optional(),
-  topicId: z.string().min(1, 'Vui lòng chọn chủ đề'),
+  topicId: z.string().min(1, "Vui lòng chọn chủ đề"),
   isPrivate: z.boolean(),
   folderId: z.string().optional(),
-  avatarUrl: z.string().url('URL ảnh không hợp lệ').optional(),
-  questions: z.array(questionSchema).min(1, 'Phải có ít nhất 1 câu hỏi'),
+  avatarUrl: z.string().url("URL ảnh không hợp lệ").optional(),
+  questions: z.array(questionSchema).min(1, "Phải có ít nhất 1 câu hỏi"),
 });
 
 type QuizForm = z.infer<typeof quizSchema>;
@@ -53,7 +62,7 @@ interface Option {
 interface Question {
   id: string;
   content: string;
-  questionType: 'MultipleChoice' | 'TrueFalse' | 'FillInBlank';
+  questionType: "MultipleChoice" | "TrueFalse" | "FillInBlank";
   timeLimit: number;
   points: number;
   options: Option[];
@@ -79,22 +88,22 @@ export default function CreateQuiz() {
     },
   });
 
-  const isPrivate = watch('isPrivate');
+  const isPrivate = watch("isPrivate");
 
   const topics = [
-    { id: '1', name: 'Toán học' },
-    { id: '2', name: 'Vật lý' },
-    { id: '3', name: 'Hóa học' },
-    { id: '4', name: 'Lịch sử' },
-    { id: '5', name: 'Địa lý' },
-    { id: '6', name: 'Văn học' },
+    { id: "1", name: "Toán học" },
+    { id: "2", name: "Vật lý" },
+    { id: "3", name: "Hóa học" },
+    { id: "4", name: "Lịch sử" },
+    { id: "5", name: "Địa lý" },
+    { id: "6", name: "Văn học" },
   ];
 
   const folders = [
-    { id: '1', name: 'Thư mục mặc định' },
-    { id: '2', name: 'Toán học' },
-    { id: '3', name: 'Vật lý' },
-    { id: '4', name: 'Hóa học' },
+    { id: "1", name: "Thư mục mặc định" },
+    { id: "2", name: "Toán học" },
+    { id: "3", name: "Vật lý" },
+    { id: "4", name: "Hóa học" },
   ];
 
   const onSubmit = async (data: QuizForm) => {
@@ -109,20 +118,25 @@ export default function CreateQuiz() {
         folderId: data.folderId ? parseInt(data.folderId, 10) : undefined,
       };
 
-      const useMock = (import.meta as any).env?.VITE_USE_MOCK === 'true';
+      const useMock = (import.meta as any).env?.VITE_USE_MOCK === "true";
       if (useMock) {
-        const created = await mockAdapter.post<{ quizId: number } & CreateQuizRequest>('/quizzes', payload);
+        const created = await mockAdapter.post<
+          { quizId: number } & CreateQuizRequest
+        >("/quizzes", payload);
         for (const [index, q] of questions.entries()) {
-          const createdQ = await mockAdapter.post<{ id: number }>('/questions', {
-            quizId: (created as any).quizId,
-            questionType: q.questionType,
-            content: q.content,
-            time: q.timeLimit,
-            points: q.points,
-            order: index + 1,
-          });
+          const createdQ = await mockAdapter.post<{ id: number }>(
+            "/questions",
+            {
+              quizId: (created as any).quizId,
+              questionType: q.questionType,
+              content: q.content,
+              time: q.timeLimit,
+              points: q.points,
+              order: index + 1,
+            }
+          );
           for (const [optIndex, opt] of q.options.entries()) {
-            await mockAdapter.post('/options', {
+            await mockAdapter.post("/options", {
               questionId: (createdQ as any).id,
               content: opt.content,
               isCorrect: opt.isCorrect,
@@ -131,9 +145,11 @@ export default function CreateQuiz() {
           }
         }
       } else {
-        const created = await apiClient.post<{ quizId: number } & CreateQuizRequest>('/quizzes', payload);
+        const created = await apiClient.post<
+          { quizId: number } & CreateQuizRequest
+        >("/quizzes", payload);
         for (const [index, q] of questions.entries()) {
-          const createdQ = await apiClient.post<{ id: number }>('/questions', {
+          const createdQ = await apiClient.post<{ id: number }>("/questions", {
             quizId: (created as any).quizId,
             questionType: q.questionType,
             content: q.content,
@@ -142,7 +158,7 @@ export default function CreateQuiz() {
             order: index + 1,
           });
           for (const [optIndex, opt] of q.options.entries()) {
-            await apiClient.post('/options', {
+            await apiClient.post("/options", {
               questionId: (createdQ as any).id,
               content: opt.content,
               isCorrect: opt.isCorrect,
@@ -152,7 +168,7 @@ export default function CreateQuiz() {
         }
       }
     } catch (error) {
-      console.error('Create quiz error:', error);
+      console.error("Create quiz error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -161,13 +177,13 @@ export default function CreateQuiz() {
   const handleAddQuestion = () => {
     const newQuestion: Question = {
       id: Date.now().toString(),
-      content: '',
-      questionType: 'MultipleChoice',
+      content: "",
+      questionType: "MultipleChoice",
       timeLimit: 30,
       points: 10,
       options: [
-        { id: '1', content: '', isCorrect: false },
-        { id: '2', content: '', isCorrect: false },
+        { id: "1", content: "", isCorrect: false },
+        { id: "2", content: "", isCorrect: false },
       ],
     };
     setCurrentQuestion(newQuestion);
@@ -180,7 +196,7 @@ export default function CreateQuiz() {
   };
 
   const handleDeleteQuestion = (questionId: string) => {
-    setQuestions(prev => prev.filter(q => q.id !== questionId));
+    setQuestions((prev) => prev.filter((q) => q.id !== questionId));
   };
 
   const handleSaveQuestion = (questionData: QuestionForm) => {
@@ -195,12 +211,14 @@ export default function CreateQuiz() {
         })),
       };
 
-      if (questions.find(q => q.id === currentQuestion.id)) {
+      if (questions.find((q) => q.id === currentQuestion.id)) {
         // Edit existing question
-        setQuestions(prev => prev.map(q => q.id === currentQuestion.id ? updatedQuestion : q));
+        setQuestions((prev) =>
+          prev.map((q) => (q.id === currentQuestion.id ? updatedQuestion : q))
+        );
       } else {
         // Add new question
-        setQuestions(prev => [...prev, updatedQuestion]);
+        setQuestions((prev) => [...prev, updatedQuestion]);
       }
     }
     setShowAddQuestion(false);
@@ -209,15 +227,20 @@ export default function CreateQuiz() {
 
   const getQuestionTypeLabel = (type: string) => {
     switch (type) {
-      case 'MultipleChoice': return 'Trắc nghiệm';
-      case 'TrueFalse': return 'Đúng/Sai';
-      case 'FillInBlank': return 'Điền từ';
-      default: return type;
+      case "MultipleChoice":
+        return "Trắc nghiệm";
+      case "TrueFalse":
+        return "Đúng/Sai";
+      case "FillInBlank":
+        return "Điền từ";
+      default:
+        return type;
     }
   };
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-secondary-50 flex flex-col">
+      <TopNavbar />
       {/* Header */}
       <div className="bg-white border-b border-secondary-200">
         <div className="container mx-auto px-6 py-6">
@@ -230,8 +253,12 @@ export default function CreateQuiz() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-secondary-900">Tạo Quiz mới</h1>
-              <p className="text-secondary-600">Thiết kế và tạo quiz tương tác</p>
+              <h1 className="text-2xl font-bold text-secondary-900">
+                Tạo Quiz mới
+              </h1>
+              <p className="text-secondary-600">
+                Thiết kế và tạo quiz tương tác
+              </p>
             </div>
           </div>
         </div>
@@ -253,7 +280,7 @@ export default function CreateQuiz() {
                   placeholder="Nhập tiêu đề quiz"
                   icon={<BookOpen size={16} />}
                   error={errors.title?.message}
-                  {...register('title')}
+                  {...register("title")}
                 />
 
                 <div>
@@ -263,7 +290,7 @@ export default function CreateQuiz() {
                   <textarea
                     className="input min-h-[100px] resize-none"
                     placeholder="Nhập mô tả quiz"
-                    {...register('description')}
+                    {...register("description")}
                   />
                 </div>
 
@@ -272,19 +299,18 @@ export default function CreateQuiz() {
                     <label className="text-sm font-medium text-secondary-700 mb-2 block">
                       Chủ đề
                     </label>
-                    <select
-                      className="input"
-                      {...register('topicId')}
-                    >
+                    <select className="input" {...register("topicId")}>
                       <option value="">Chọn chủ đề</option>
-                      {topics.map(topic => (
+                      {topics.map((topic) => (
                         <option key={topic.id} value={topic.id}>
                           {topic.name}
                         </option>
                       ))}
                     </select>
                     {errors.topicId && (
-                      <p className="text-sm text-error-600 mt-1">{errors.topicId.message}</p>
+                      <p className="text-sm text-error-600 mt-1">
+                        {errors.topicId.message}
+                      </p>
                     )}
                   </div>
 
@@ -292,12 +318,9 @@ export default function CreateQuiz() {
                     <label className="text-sm font-medium text-secondary-700 mb-2 block">
                       Lưu vào thư mục
                     </label>
-                    <select
-                      className="input"
-                      {...register('folderId')}
-                    >
+                    <select className="input" {...register("folderId")}>
                       <option value="">Chọn thư mục</option>
-                      {folders.map(folder => (
+                      {folders.map((folder) => (
                         <option key={folder.id} value={folder.id}>
                           {folder.name}
                         </option>
@@ -310,7 +333,7 @@ export default function CreateQuiz() {
                   label="Link ảnh thumbnail"
                   placeholder="https://example.com/image.jpg"
                   error={errors.avatarUrl?.message}
-                  {...register('avatarUrl')}
+                  {...register("avatarUrl")}
                 />
 
                 <div className="flex items-center space-x-4">
@@ -318,7 +341,7 @@ export default function CreateQuiz() {
                     <input
                       type="checkbox"
                       className="rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
-                      {...register('isPrivate')}
+                      {...register("isPrivate")}
                     />
                     <span className="ml-2 text-sm text-secondary-600">
                       Quiz riêng tư (chỉ học sinh trong lớp mới thấy)
@@ -335,10 +358,7 @@ export default function CreateQuiz() {
                   <h3 className="text-lg font-semibold text-secondary-900">
                     Câu hỏi ({questions.length})
                   </h3>
-                  <Button
-                    type="button"
-                    onClick={handleAddQuestion}
-                  >
+                  <Button type="button" onClick={handleAddQuestion}>
                     <Plus className="w-4 h-4 mr-2" />
                     Thêm câu hỏi
                   </Button>
@@ -355,7 +375,10 @@ export default function CreateQuiz() {
                 ) : (
                   <div className="space-y-4">
                     {questions.map((question, index) => (
-                      <div key={question.id} className="p-4 border border-secondary-200 rounded-lg">
+                      <div
+                        key={question.id}
+                        className="p-4 border border-secondary-200 rounded-lg"
+                      >
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
@@ -410,7 +433,10 @@ export default function CreateQuiz() {
             <div className="flex items-center justify-between">
               <div className="text-sm text-secondary-600">
                 <div>Tổng câu hỏi: {questions.length}</div>
-                <div>Thời gian ước tính: {questions.reduce((t, q) => t + (q.timeLimit || 0), 0)} giây</div>
+                <div>
+                  Thời gian ước tính:{" "}
+                  {questions.reduce((t, q) => t + (q.timeLimit || 0), 0)} giây
+                </div>
               </div>
               <div className="flex space-x-3">
                 <Button
@@ -425,7 +451,9 @@ export default function CreateQuiz() {
                   loading={isLoading}
                   disabled={isLoading || questions.length === 0}
                 >
-                  {isLoading ? 'Đang tạo...' : (
+                  {isLoading ? (
+                    "Đang tạo..."
+                  ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
                       Lưu Quiz
@@ -453,6 +481,7 @@ export default function CreateQuiz() {
           />
         )}
       </Modal>
+      <Footer />
     </div>
   );
 }
@@ -466,7 +495,7 @@ interface QuestionFormProps {
 
 function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
   const [options, setOptions] = useState<Option[]>(question.options);
-  
+
   const {
     register,
     handleSubmit,
@@ -483,31 +512,37 @@ function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
     },
   });
 
-  const questionType = watch('questionType');
+  const questionType = watch("questionType");
 
   const handleAddOption = () => {
     const newOption: Option = {
       id: Date.now().toString(),
-      content: '',
+      content: "",
       isCorrect: false,
     };
-    setOptions(prev => [...prev, newOption]);
+    setOptions((prev) => [...prev, newOption]);
   };
 
   const handleRemoveOption = (optionId: string) => {
-    setOptions(prev => prev.filter(opt => opt.id !== optionId));
+    setOptions((prev) => prev.filter((opt) => opt.id !== optionId));
   };
 
-  const handleOptionChange = (optionId: string, field: keyof Option, value: any) => {
-    setOptions(prev => prev.map(opt => 
-      opt.id === optionId ? { ...opt, [field]: value } : opt
-    ));
+  const handleOptionChange = (
+    optionId: string,
+    field: keyof Option,
+    value: any
+  ) => {
+    setOptions((prev) =>
+      prev.map((opt) =>
+        opt.id === optionId ? { ...opt, [field]: value } : opt
+      )
+    );
   };
 
   const onSubmit = (data: QuestionForm) => {
     onSave({
       ...data,
-      options: options.map(opt => ({
+      options: options.map((opt) => ({
         content: opt.content,
         isCorrect: opt.isCorrect,
       })),
@@ -520,7 +555,7 @@ function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
         label="Nội dung câu hỏi"
         placeholder="Nhập câu hỏi"
         error={errors.content?.message}
-        {...register('content')}
+        {...register("content")}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -528,10 +563,7 @@ function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
           <label className="text-sm font-medium text-secondary-700 mb-2 block">
             Loại câu hỏi
           </label>
-          <select
-            className="input"
-            {...register('questionType')}
-          >
+          <select className="input" {...register("questionType")}>
             <option value="MultipleChoice">Trắc nghiệm</option>
             <option value="TrueFalse">Đúng/Sai</option>
             <option value="FillInBlank">Điền từ</option>
@@ -543,7 +575,7 @@ function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
           type="number"
           placeholder="30"
           error={errors.timeLimit?.message}
-          {...register('timeLimit', { valueAsNumber: true })}
+          {...register("timeLimit", { valueAsNumber: true })}
         />
 
         <Input
@@ -551,7 +583,7 @@ function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
           type="number"
           placeholder="10"
           error={errors.points?.message}
-          {...register('points', { valueAsNumber: true })}
+          {...register("points", { valueAsNumber: true })}
         />
       </div>
 
@@ -580,17 +612,21 @@ function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
                 name="correctAnswer"
                 checked={option.isCorrect}
                 onChange={() => {
-                  setOptions(prev => prev.map(opt => ({
-                    ...opt,
-                    isCorrect: opt.id === option.id
-                  })));
+                  setOptions((prev) =>
+                    prev.map((opt) => ({
+                      ...opt,
+                      isCorrect: opt.id === option.id,
+                    }))
+                  );
                 }}
                 className="text-primary-600"
               />
               <Input
                 placeholder={`Đáp án ${index + 1}`}
                 value={option.content}
-                onChange={(e) => handleOptionChange(option.id, 'content', e.target.value)}
+                onChange={(e) =>
+                  handleOptionChange(option.id, "content", e.target.value)
+                }
                 className="flex-1"
               />
               {options.length > 2 && (
@@ -610,16 +646,10 @@ function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
       </div>
 
       <div className="flex justify-end space-x-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-        >
+        <Button type="button" variant="outline" onClick={onCancel}>
           Hủy
         </Button>
-        <Button type="submit">
-          Lưu câu hỏi
-        </Button>
+        <Button type="submit">Lưu câu hỏi</Button>
       </div>
     </form>
   );

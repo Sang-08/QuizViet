@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen } from 'lucide-react';
-import { Button } from '../../../components/common/Button';
-import { Input } from '../../../components/common/Input';
-import { QuizCard } from '../../../components/common/QuizCard';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, BookOpen } from "lucide-react";
+import { Button } from "../../../components/common/Button";
+import { Input } from "../../../components/common/Input";
+import { QuizCard } from "../../../components/common/QuizCard";
+import { TopNavbar } from "../../../components/layout/TopNavbar";
+import { Footer } from "../../../components/layout/Footer";
 
 interface Quiz {
   id: string;
   title: string;
   description: string;
   topic: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: "Easy" | "Medium" | "Hard";
   numberOfPlays: number;
   rating: number;
   estimatedTime: number;
@@ -21,69 +23,81 @@ interface Quiz {
 
 export default function BrowseQuizzes() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTopic, setSelectedTopic] = useState('all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("all");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("all");
 
   // Mock data - sẽ thay thế bằng API call thực tế
   const quizzes: Quiz[] = [
     {
-      id: '1',
-      title: 'Kiểm tra Toán học lớp 10',
-      description: 'Bài kiểm tra về đại số và hình học cơ bản',
-      topic: 'Toán học',
-      difficulty: 'Medium',
+      id: "1",
+      title: "Kiểm tra Toán học lớp 10",
+      description: "Bài kiểm tra về đại số và hình học cơ bản",
+      topic: "Toán học",
+      difficulty: "Medium",
       numberOfPlays: 1247,
       rating: 4.8,
       estimatedTime: 30,
-      createdAt: '2024-10-01',
+      createdAt: "2024-10-01",
       isPublic: true,
-      author: 'Nguyễn Văn Giáo viên',
+      author: "Nguyễn Văn Giáo viên",
     },
     {
-      id: '2',
-      title: 'Quiz Vật lý - Điện học',
-      description: 'Câu hỏi về dòng điện và từ trường',
-      topic: 'Vật lý',
-      difficulty: 'Hard',
+      id: "2",
+      title: "Quiz Vật lý - Điện học",
+      description: "Câu hỏi về dòng điện và từ trường",
+      topic: "Vật lý",
+      difficulty: "Hard",
       numberOfPlays: 892,
       rating: 4.6,
       estimatedTime: 45,
-      createdAt: '2024-09-28',
+      createdAt: "2024-09-28",
       isPublic: true,
-      author: 'Trần Thị Giáo viên',
+      author: "Trần Thị Giáo viên",
     },
     {
-      id: '3',
-      title: 'Lịch sử Việt Nam',
-      description: 'Các sự kiện lịch sử quan trọng',
-      topic: 'Lịch sử',
-      difficulty: 'Easy',
+      id: "3",
+      title: "Lịch sử Việt Nam",
+      description: "Các sự kiện lịch sử quan trọng",
+      topic: "Lịch sử",
+      difficulty: "Easy",
       numberOfPlays: 1567,
       rating: 4.9,
       estimatedTime: 20,
-      createdAt: '2024-09-25',
+      createdAt: "2024-09-25",
       isPublic: true,
-      author: 'Lê Văn Giáo viên',
+      author: "Lê Văn Giáo viên",
     },
   ];
 
-  const topics = ['Tất cả', 'Toán học', 'Vật lý', 'Hóa học', 'Lịch sử', 'Địa lý', 'Văn học'];
-  const difficulties = ['Tất cả', 'Easy', 'Medium', 'Hard'];
+  const topics = [
+    "Tất cả",
+    "Toán học",
+    "Vật lý",
+    "Hóa học",
+    "Lịch sử",
+    "Địa lý",
+    "Văn học",
+  ];
+  const difficulties = ["Tất cả", "Easy", "Medium", "Hard"];
 
-  const filteredQuizzes = quizzes.filter(quiz => {
-    const matchesSearch = quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         quiz.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         quiz.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTopic = selectedTopic === 'all' || quiz.topic === selectedTopic;
-    const matchesDifficulty = selectedDifficulty === 'all' || quiz.difficulty === selectedDifficulty;
+  const filteredQuizzes = quizzes.filter((quiz) => {
+    const matchesSearch =
+      quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quiz.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quiz.author.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTopic =
+      selectedTopic === "all" || quiz.topic === selectedTopic;
+    const matchesDifficulty =
+      selectedDifficulty === "all" || quiz.difficulty === selectedDifficulty;
     return matchesSearch && matchesTopic && matchesDifficulty;
   });
 
   // bỏ rating/difficulty để card tối giản theo thiết kế
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-secondary-50 flex flex-col">
+      <TopNavbar />
       {/* Header */}
       <div className="bg-white border-b border-secondary-200">
         <div className="container mx-auto px-6 py-8">
@@ -115,8 +129,11 @@ export default function BrowseQuizzes() {
                   value={selectedTopic}
                   onChange={(e) => setSelectedTopic(e.target.value)}
                 >
-                  {topics.map(topic => (
-                    <option key={topic} value={topic === 'Tất cả' ? 'all' : topic}>
+                  {topics.map((topic) => (
+                    <option
+                      key={topic}
+                      value={topic === "Tất cả" ? "all" : topic}
+                    >
                       {topic}
                     </option>
                   ))}
@@ -128,8 +145,11 @@ export default function BrowseQuizzes() {
                   value={selectedDifficulty}
                   onChange={(e) => setSelectedDifficulty(e.target.value)}
                 >
-                  {difficulties.map(difficulty => (
-                    <option key={difficulty} value={difficulty === 'Tất cả' ? 'all' : difficulty}>
+                  {difficulties.map((difficulty) => (
+                    <option
+                      key={difficulty}
+                      value={difficulty === "Tất cả" ? "all" : difficulty}
+                    >
                       {difficulty}
                     </option>
                   ))}
@@ -196,6 +216,7 @@ export default function BrowseQuizzes() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
