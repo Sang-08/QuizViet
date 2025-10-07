@@ -17,121 +17,119 @@ import AdminUserDetail from '../app/routes/admin/UserDetail';
 
 // Teacher routes
 import TeacherLayout from '../app/routes/teacher/layout';
-import TeacherFolders from '../app/routes/teacher/Folders';
-import TeacherClasses from '../app/routes/teacher/Classes';
+import TeacherFolders from "../app/routes/teacher/Folders";
 
 // Student routes
-import StudentLayout from '../app/routes/student/layout';
-import StudentClasses from '../app/routes/student/Classes';
-import StudentHistory from '../app/routes/student/History';
+import StudentLayout from "../app/routes/student/layout";
+import StudentClasses from "../app/routes/student/Classes";
+import StudentHistory from "../app/routes/student/History";
 
 // Host/Play routes
-import HostLobby from '../app/routes/host/Lobby';
-import HostLive from '../app/routes/host/Live';
-import HostLeaderboard from '../app/routes/host/Leaderboard';
-import JoinByPin from '../app/routes/play/JoinByPin';
-import PlayLive from '../app/routes/play/Live';
-import PlayResult from '../app/routes/play/Result';
+import HostLobby from "../app/routes/host/Lobby";
+import HostLive from "../app/routes/host/Live";
+import HostLeaderboard from "../app/routes/host/Leaderboard";
+import JoinByPin from "../app/routes/play/JoinByPin";
+import PlayLive from "../app/routes/play/Live";
+import PlayResult from "../app/routes/play/Result";
 
 // Search routes
-import BrowseQuizzes from '../app/routes/search/Browse';
-import FavouriteQuizzes from '../app/routes/favourites/List';
-import Home from '../app/routes/Home';
-import QuizPreview from '../app/routes/quiz/Preview';
+import BrowseQuizzes from "../app/routes/search/Browse";
+import FavouriteQuizzes from "../app/routes/favourites/List";
+import Home from "../app/routes/Home";
+import QuizPreview from "../app/routes/quiz/Preview";
 
 // Additional routes
-import Profile from '../app/routes/Profile';
-import CreateQuiz from '../app/routes/quiz/CreateQuiz';
-import TeacherHistory from '../app/routes/teacher/History';
+import Profile from "../app/routes/Profile";
+import CreateQuiz from "../app/routes/quiz/CreateQuiz";
+import TeacherHistory from "../app/routes/teacher/History";
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Home />,
   },
   {
-    path: '/auth',
+    path: "/auth",
     children: [
-      { path: 'login', element: <Login /> },
-      { path: 'register', element: <Register /> },
-      { path: 'forgot', element: <ForgotPassword /> },
-      { path: 'verify-otp', element: <VerifyOtp /> },
-      { path: 'reset', element: <ResetPassword /> },
+      { path: "login", element: <Login /> },
+      { path: "register", element: <Register /> },
+      { path: "forgot", element: <ForgotPassword /> },
+      { path: "verify-otp", element: <VerifyOtp /> },
+      { path: "reset", element: <ResetPassword /> },
     ],
   },
   {
-    path: '/admin',
+    path: "/admin",
     element: (
       <RequireAuth>
-        <RequireRole roles={['Admin']}>
+        <RequireRole roles={["Admin"]}>
           <AdminLayout />
         </RequireRole>
       </RequireAuth>
     ),
     children: [
       { index: true, element: <AdminDashboard /> },
-      { path: 'users', element: <AdminUsers /> },
-      { path: 'users/:userId', element: <AdminUserDetail /> },
+      { path: "users", element: <AdminUsers /> },
+      { path: "users/:userId", element: <AdminUserDetail /> },
     ],
   },
   {
-    path: '/teacher',
+    path: "/teacher",
     element: (
       <RequireAuth>
-        <RequireRole roles={['Teacher']}>
+        <RequireRole roles={["Teacher"]}>
           <TeacherLayout />
         </RequireRole>
       </RequireAuth>
     ),
     children: [
       { index: true, element: <Navigate to="/" replace /> },
-      { path: 'folders', element: <TeacherFolders /> },
-      { path: 'classes', element: <TeacherClasses /> },
-      { path: 'history', element: <TeacherHistory /> },
+      { path: "folders", element: <TeacherFolders /> },
+      { path: "history", element: <TeacherHistory /> },
     ],
   },
   {
-    path: '/student',
+    path: "/student",
     element: (
       <RequireAuth>
-        <RequireRole roles={['Student']}>
+        <RequireRole roles={["Student"]}>
           <StudentLayout />
         </RequireRole>
       </RequireAuth>
     ),
     children: [
       { index: true, element: <Navigate to="/" replace /> },
-      { path: 'classes', element: <StudentClasses /> },
-      { path: 'history', element: <StudentHistory /> },
+      { path: "classes", element: <StudentClasses /> },
+      { path: "history", element: <StudentHistory /> },
     ],
   },
   {
-    path: '/host',
+    path: "/host",
     element: (
       <RequireAuth>
-        <RequireRole roles={['Teacher']}>
+        <RequireRole roles={["Teacher"]}>
           <HostLobby />
         </RequireRole>
       </RequireAuth>
     ),
     children: [
-      { path: 'lobby/:sessionId', element: <HostLobby /> },
-      { path: 'live/:sessionId', element: <HostLive /> },
-      { path: 'leaderboard/:sessionId', element: <HostLeaderboard /> },
+      { path: "lobby/:sessionId", element: <HostLobby /> },
+      { path: "live/:sessionId", element: <HostLive /> },
+      { path: "leaderboard/:sessionId", element: <HostLeaderboard /> },
     ],
   },
   {
-    path: '/play',
+    path: "/play",
     children: [
-      { path: 'join', element: <JoinByPin /> },
-      { path: 'live/:sessionId', element: <PlayLive /> },
-      { path: 'result/:sessionId', element: <PlayResult /> },
+      { path: "join", element: <JoinByPin /> },
+      { path: "live/:sessionId", element: <PlayLive /> },
+      { path: "result/:sessionId", element: <PlayResult /> },
     ],
   },
-  { path: '/quiz/preview/:quizId', element: <QuizPreview /> },
-  { path: '/search', element: <BrowseQuizzes /> },
+  { path: "/quiz/preview/:quizId", element: <QuizPreview /> },
+  { path: "/search", element: <BrowseQuizzes /> },
   {
-    path: '/favourites',
+    path: "/favourites",
     element: (
       <RequireAuth>
         <FavouriteQuizzes />
@@ -139,7 +137,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/profile',
+    path: "/profile",
     element: (
       <RequireAuth>
         <Profile />
@@ -147,14 +145,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/quiz/create',
+    path: "/quiz/create",
     element: (
       <RequireAuth>
-        <RequireRole roles={['Teacher']}>
+        <RequireRole roles={["Teacher"]}>
           <CreateQuiz />
         </RequireRole>
       </RequireAuth>
     ),
   },
-  { path: '*', element: <div>404 - Page Not Found</div> },
+  { path: "*", element: <div>404 - Page Not Found</div> },
 ]);
