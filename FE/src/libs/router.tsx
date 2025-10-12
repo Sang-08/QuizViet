@@ -43,6 +43,7 @@ import QuizPreview from "../app/routes/quiz/Preview";
 // Additional routes
 import Profile from "../app/routes/Profile";
 import CreateQuiz from "../app/routes/quiz/CreateQuiz";
+import EditQuiz from "../app/routes/quiz/EditQuiz";
 
 export const router = createBrowserRouter(
   [
@@ -153,6 +154,16 @@ export const router = createBrowserRouter(
         <RequireAuth>
           <RequireRole roles={["Teacher"]}>
             <CreateQuiz />
+          </RequireRole>
+        </RequireAuth>
+      ),
+    },
+    {
+      path: "/quiz/edit/:quizId",
+      element: (
+        <RequireAuth>
+          <RequireRole roles={["Teacher"]}>
+            <EditQuiz />
           </RequireRole>
         </RequireAuth>
       ),

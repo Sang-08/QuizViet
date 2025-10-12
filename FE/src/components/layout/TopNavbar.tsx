@@ -34,10 +34,10 @@ export const TopNavbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 w-full backdrop-blur-lg bg-white/70 border-b border-white/30">
+    <header className="sticky top-0 z-30 w-full bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 shadow-lg">
       <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-3">
         {/* Brand */}
-        <Logo size="md" to="/" />
+        <Logo size="md" to="/" variant="white" />
 
         {/* Nav removed as requested */}
 
@@ -45,41 +45,48 @@ export const TopNavbar: React.FC = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-3 shrink-0">
-          <Button variant="ghost" size="sm" aria-label="Notifications">
-            <Bell className="w-5 h-5" />
-          </Button>
+          <button
+            className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+            aria-label="Notifications"
+          >
+            <Bell className="w-5 h-5 text-white" />
+          </button>
           <div className="relative" ref={ref}>
             <button
               type="button"
-              className="flex items-center gap-3"
+              className="flex items-center gap-3 hover:bg-white/10 rounded-lg px-2 py-1 transition-colors"
               onClick={() => setOpen((v) => !v)}
             >
               <div className="hidden sm:block leading-4 text-right">
-                <p className="text-sm font-medium text-secondary-900">
+                <p className="text-sm font-medium text-white">
                   {user?.name || "Người dùng"}
                 </p>
-                <p className="text-[12px] text-secondary-500">
+                <p className="text-[12px] text-white/80">
                   {user?.email || "guest@example.com"}
                 </p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
                 <UserIcon className="w-5 h-5 text-primary-600" />
               </div>
             </button>
             {open && (
               <div className="absolute right-0 top-12 w-56 rounded-lg bg-white shadow-lg border border-secondary-200 p-2 z-50">
-                <button
-                  className="w-full text-left px-3 py-2 rounded-md hover:bg-secondary-50 text-sm"
-                  onClick={() => navigate("/profile")}
-                >
-                  <UserIcon className="w-4 h-4 mr-2 inline" /> Hồ sơ
-                </button>
-                <button
-                  className="w-full text-left px-3 py-2 rounded-md hover:bg-secondary-50 text-sm"
-                  onClick={() => navigate("/favourites")}
-                >
-                  <Heart className="w-4 h-4 mr-2 inline" /> Yêu thích
-                </button>
+                {user?.role !== "Admin" && (
+                  <>
+                    <button
+                      className="w-full text-left px-3 py-2 rounded-md hover:bg-secondary-50 text-sm"
+                      onClick={() => navigate("/profile")}
+                    >
+                      <UserIcon className="w-4 h-4 mr-2 inline" /> Hồ sơ
+                    </button>
+                    <button
+                      className="w-full text-left px-3 py-2 rounded-md hover:bg-secondary-50 text-sm"
+                      onClick={() => navigate("/favourites")}
+                    >
+                      <Heart className="w-4 h-4 mr-2 inline" /> Yêu thích
+                    </button>
+                  </>
+                )}
                 {user?.role === "Student" && (
                   <>
                     <button

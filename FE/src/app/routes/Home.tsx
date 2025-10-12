@@ -1,5 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Play, SlidersHorizontal, Bookmark } from "lucide-react";
+import {
+  Search,
+  Play,
+  SlidersHorizontal,
+  Bookmark,
+  BookOpen,
+} from "lucide-react";
 import { Button } from "../../components/common/Button";
 import { Logo } from "../../components/common/Logo";
 import { TopNavbar } from "../../components/layout/TopNavbar";
@@ -93,11 +99,7 @@ export default function Landing() {
   const user = storage.getUser();
 
   return (
-    <div className="min-h-screen page-bg relative overflow-x-hidden flex flex-col">
-      <div className="blob blob-1" />
-      <div className="blob blob-2" />
-      <div className="blob blob-3" />
-
+    <div className="min-h-screen bg-white relative overflow-x-hidden flex flex-col">
       {user ? (
         <TopNavbar />
       ) : (
@@ -169,28 +171,28 @@ export default function Landing() {
         </section>
 
         {/* Categories filter bar */}
-        <section className="flex items-center justify-between mb-4">
+        <section className="flex items-center justify-between mb-4 p-4 bg-gradient-to-r from-secondary-50 to-primary-50 rounded-lg border border-primary-100">
           <div className="flex items-center gap-2 overflow-x-auto">
             {categories.map((c) => (
               <button
                 key={c}
                 onClick={() => setActiveCategory(c)}
-                className={`px-4 py-2 rounded-full text-sm ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   activeCategory === c
-                    ? "bg-primary-600 text-white"
-                    : "bg-white/80 hover:bg-white text-secondary-700 border border-white/50"
+                    ? "bg-primary-600 text-white shadow-md"
+                    : "bg-white hover:bg-primary-50 text-secondary-700 border border-secondary-200"
                 }`}
               >
                 {c}
               </button>
             ))}
           </div>
-          <button className="px-3 py-2 rounded-lg bg-white/80 border border-white/50 text-sm flex items-center">
+          <button className="px-3 py-2 rounded-lg bg-white border border-secondary-200 text-sm flex items-center hover:bg-primary-50 transition-all">
             <SlidersHorizontal className="w-4 h-4 mr-2" /> Lọc
           </button>
         </section>
 
-        <p className="text-sm text-white/90 mb-6">
+        <p className="text-sm text-secondary-600 mb-6 font-medium">
           Tìm thấy {filtered.length} quiz
         </p>
 
@@ -200,41 +202,39 @@ export default function Landing() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {filtered.map((q) => (
-            <div key={q.id} className="card">
-              <Link
-                to={`/quiz/preview/${q.id}`}
-                className="block card-content p-0"
-              >
-                <div className="h-48 bg-secondary-200 rounded-t-xl overflow-hidden"></div>
+            <div
+              key={q.id}
+              className="rounded-2xl overflow-hidden border border-primary-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white"
+            >
+              <Link to={`/quiz/preview/${q.id}`} className="block">
+                <div className="h-48 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 flex items-center justify-center">
+                  <BookOpen className="w-20 h-20 text-blue-400" />
+                </div>
                 <div className="p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs px-2 py-1 bg-secondary-100 text-secondary-800 rounded-full">
+                  <div className="mb-3">
+                    <span className="inline-block text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full font-medium">
                       {q.cat}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-secondary-900 mb-1">
+                  <h3 className="font-bold text-secondary-900 mb-2 text-lg line-clamp-2">
                     {q.title}
                   </h3>
-                  <div className="flex items-center justify-between text-sm text-secondary-600 mb-4">
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center">
-                        <Bookmark className="w-4 h-4 mr-1" />
-                        {q.questions} câu
-                      </span>
-                    </div>
+                  <div className="flex items-center text-sm text-secondary-600 space-x-4 mb-4">
+                    <span className="flex items-center">
+                      <Bookmark className="w-4 h-4 mr-1" />
+                      {q.questions} câu
+                    </span>
                     <span>{q.plays} lượt chơi</span>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      className="w-full"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate(`/quiz/preview/${q.id}`);
-                      }}
-                    >
-                      Xem chi tiết
-                    </Button>
-                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(`/quiz/preview/${q.id}`);
+                    }}
+                  >
+                    Xem chi tiết
+                  </Button>
                 </div>
               </Link>
             </div>

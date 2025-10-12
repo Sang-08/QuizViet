@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Shield, ArrowLeft } from 'lucide-react';
-import { Button } from '../../../components/common/Button';
-import { Input } from '../../../components/common/Input';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Shield, ArrowLeft } from "lucide-react";
+import { Button } from "../../../components/common/Button";
+import { Input } from "../../../components/common/Input";
 
 const otpSchema = z.object({
-  otp: z.string().min(6, 'Mã OTP phải có 6 chữ số').max(6, 'Mã OTP phải có 6 chữ số'),
+  otp: z
+    .string()
+    .min(6, "Mã OTP phải có 6 chữ số")
+    .max(6, "Mã OTP phải có 6 chữ số"),
 });
 
 type OtpForm = z.infer<typeof otpSchema>;
@@ -29,15 +32,15 @@ export default function VerifyOtp() {
     setIsLoading(true);
     try {
       // TODO: Call verify OTP API
-      console.log('OTP data:', data);
-      
+      console.log("OTP data:", data);
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Redirect to reset password
-      navigate('/auth/reset');
+      navigate("/auth/reset");
     } catch (error) {
-      console.error('OTP verification error:', error);
+      console.error("OTP verification error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -46,15 +49,18 @@ export default function VerifyOtp() {
   const handleResendOtp = async () => {
     try {
       // TODO: Call resend OTP API
-      console.log('Resend OTP');
+      console.log("Resend OTP");
     } catch (error) {
-      console.error('Resend OTP error:', error);
+      console.error("Resend OTP error:", error);
     }
   };
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen auth-bg relative flex items-center justify-center p-4">
+      <div className="auth-blob auth-blob-1" />
+      <div className="auth-blob auth-blob-2" />
+      <div className="auth-blob auth-blob-3" />
+      <div className="w-full max-w-md relative z-10">
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-2xl mb-4">
@@ -79,7 +85,7 @@ export default function VerifyOtp() {
                 icon={<Shield size={16} />}
                 error={errors.otp?.message}
                 maxLength={6}
-                {...register('otp')}
+                {...register("otp")}
               />
 
               <Button
@@ -88,7 +94,7 @@ export default function VerifyOtp() {
                 loading={isLoading}
                 disabled={isLoading}
               >
-                {isLoading ? 'Đang xác thực...' : 'Xác thực OTP'}
+                {isLoading ? "Đang xác thực..." : "Xác thực OTP"}
               </Button>
 
               <div className="text-center">

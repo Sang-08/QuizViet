@@ -239,10 +239,10 @@ export default function CreateQuiz() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <TopNavbar />
       {/* Header */}
-      <div className="bg-white border-b border-secondary-200">
+      <div className="bg-gradient-to-r from-primary-50 to-accent-50 border-b border-primary-100">
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center space-x-4">
             <Button

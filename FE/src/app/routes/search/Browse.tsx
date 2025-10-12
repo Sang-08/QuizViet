@@ -96,10 +96,10 @@ export default function BrowseQuizzes() {
   // bỏ rating/difficulty để card tối giản theo thiết kế
 
   return (
-    <div className="min-h-screen bg-secondary-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <TopNavbar />
       {/* Header */}
-      <div className="bg-white border-b border-secondary-200">
+      <div className="bg-gradient-to-r from-primary-50 to-accent-50 border-b border-primary-100">
         <div className="container mx-auto px-6 py-8">
           <h1 className="text-4xl font-bold text-secondary-900 mb-2">
             Khám phá Quiz

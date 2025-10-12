@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Lock, ArrowLeft } from 'lucide-react';
-import { Button } from '../../../components/common/Button';
-import { Input } from '../../../components/common/Input';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Lock, ArrowLeft } from "lucide-react";
+import { Button } from "../../../components/common/Button";
+import { Input } from "../../../components/common/Input";
 
-const resetSchema = z.object({
-  newPassword: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: 'Mật khẩu xác nhận không khớp',
-  path: ['confirmPassword'],
-});
+const resetSchema = z
+  .object({
+    newPassword: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Mật khẩu xác nhận không khớp",
+    path: ["confirmPassword"],
+  });
 
 type ResetForm = z.infer<typeof resetSchema>;
 
@@ -33,23 +35,26 @@ export default function ResetPassword() {
     setIsLoading(true);
     try {
       // TODO: Call reset password API
-      console.log('Reset password data:', data);
-      
+      console.log("Reset password data:", data);
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Redirect to login
-      navigate('/auth/login');
+      navigate("/auth/login");
     } catch (error) {
-      console.error('Reset password error:', error);
+      console.error("Reset password error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen auth-bg relative flex items-center justify-center p-4">
+      <div className="auth-blob auth-blob-1" />
+      <div className="auth-blob auth-blob-2" />
+      <div className="auth-blob auth-blob-3" />
+      <div className="w-full max-w-md relative z-10">
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-success-600 rounded-2xl mb-4">
@@ -74,7 +79,7 @@ export default function ResetPassword() {
                 icon={<Lock size={16} />}
                 showPasswordToggle
                 error={errors.newPassword?.message}
-                {...register('newPassword')}
+                {...register("newPassword")}
               />
 
               <Input
@@ -84,7 +89,7 @@ export default function ResetPassword() {
                 icon={<Lock size={16} />}
                 showPasswordToggle
                 error={errors.confirmPassword?.message}
-                {...register('confirmPassword')}
+                {...register("confirmPassword")}
               />
 
               <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
@@ -104,7 +109,7 @@ export default function ResetPassword() {
                 loading={isLoading}
                 disabled={isLoading}
               >
-                {isLoading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+                {isLoading ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
               </Button>
 
               <div className="text-center">
