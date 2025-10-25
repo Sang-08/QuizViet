@@ -298,7 +298,6 @@ export default function TeacherClasses() {
 
   const [newClassName, setNewClassName] = useState("");
   const [newClassDescription, setNewClassDescription] = useState("");
-  const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"owned" | "joined">("owned");
   const [headerInfo, setHeaderInfo] = useState<"none" | "students" | "quizzes">(
     "none"
@@ -345,13 +344,13 @@ export default function TeacherClasses() {
     <div className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex-1 flex justify-center">
-          <input
-            className="input w-full max-w-xs"
-            placeholder="Tìm kiếm"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div>
+          <h1 className="text-3xl font-bold text-secondary-900">
+            Lớp học của tôi
+          </h1>
+          <p className="text-secondary-600 mt-1">
+            Quản lý các lớp học và học sinh
+          </p>
         </div>
         <div className="flex items-center space-x-3">
           <Button onClick={() => setShowCreateModal(true)}>Tạo Lớp</Button>
@@ -366,30 +365,13 @@ export default function TeacherClasses() {
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
                 <button
-                  className={`px-3 py-2 rounded-md text-left text-sm font-medium ${
-                    activeTab === "owned"
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-secondary-700 hover:bg-secondary-50"
-                  }`}
+                  className="px-3 py-2 rounded-md text-left text-sm font-medium bg-primary-50 text-primary-700"
                   onClick={() => {
                     setActiveTab("owned");
                     setSelectedClass(null);
                   }}
                 >
                   Lớp do bạn sở hữu
-                </button>
-                <button
-                  className={`px-3 py-2 rounded-md text-left text-sm font-medium ${
-                    activeTab === "joined"
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-secondary-700 hover:bg-secondary-50"
-                  }`}
-                  onClick={() => {
-                    setActiveTab("joined");
-                    setSelectedClass(null);
-                  }}
-                >
-                  Lớp đã tham gia
                 </button>
               </div>
 
@@ -537,33 +519,28 @@ export default function TeacherClasses() {
                               ({st.email})
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm">
-                              Sửa
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-error-600"
-                              onClick={() =>
-                                setClassesState((prev) =>
-                                  prev.map((c) =>
-                                    c.id === selectedClass.id
-                                      ? {
-                                          ...c,
-                                          students: c.students.filter(
-                                            (s) => s.id !== st.id
-                                          ),
-                                          studentCount: c.studentCount - 1,
-                                        }
-                                      : c
-                                  )
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-error-600"
+                            onClick={() =>
+                              setClassesState((prev) =>
+                                prev.map((c) =>
+                                  c.id === selectedClass.id
+                                    ? {
+                                        ...c,
+                                        students: c.students.filter(
+                                          (s) => s.id !== st.id
+                                        ),
+                                        studentCount: c.studentCount - 1,
+                                      }
+                                    : c
                                 )
-                              }
-                            >
-                              Xóa
-                            </Button>
-                          </div>
+                              )
+                            }
+                          >
+                            Xóa
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -664,11 +641,8 @@ export default function TeacherClasses() {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {(activeTab === "owned" ? classesState : joinedClassesState)
-                .filter((c) =>
-                  c.name.toLowerCase().includes(search.toLowerCase())
-                )
-                .map((classItem) => (
+              {(activeTab === "owned" ? classesState : joinedClassesState).map(
+                (classItem) => (
                   <div
                     key={classItem.id}
                     className="card hover:shadow-xl transition-all duration-200 cursor-pointer"
@@ -800,7 +774,8 @@ export default function TeacherClasses() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )
+              )}
             </div>
           )}
           {classesState.length === 0 && (
@@ -936,9 +911,12 @@ export default function TeacherClasses() {
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium text-secondary-700 mb-2 block">
-              Email học sinh
+              ID học sinh
             </label>
-            <Input placeholder="Nhập email học sinh" type="email" />
+            <Input placeholder="Nhập ID học sinh" type="text" />
+            <p className="text-xs text-secondary-500 mt-1">
+              Học sinh có thể tìm ID của mình trong phần Hồ sơ
+            </p>
           </div>
 
           <div className="bg-secondary-50 rounded-lg p-4">
@@ -956,7 +934,7 @@ export default function TeacherClasses() {
                       {student.name}
                     </span>
                     <span className="text-secondary-500 ml-2">
-                      ({student.email})
+                      (ID: {student.id})
                     </span>
                   </div>
                   <Button variant="ghost" size="sm" className="text-error-600">

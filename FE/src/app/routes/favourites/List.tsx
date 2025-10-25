@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen, Eye, Heart } from 'lucide-react';
-import { Button } from '../../../components/common/Button';
-import { Input } from '../../../components/common/Input';
-import { QuizCard } from '../../../components/common/QuizCard';
-import { TopNavbar } from '../../../components/layout/TopNavbar';
-import { Footer } from '../../../components/layout/Footer';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { BookOpen, Eye, Heart } from "lucide-react";
+import { Button } from "../../../components/common/Button";
+import { QuizCard } from "../../../components/common/QuizCard";
+import { TopNavbar } from "../../../components/layout/TopNavbar";
+import { Footer } from "../../../components/layout/Footer";
 
 interface FavouriteQuiz {
   id: string;
   title: string;
   description: string;
   topic: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: "Easy" | "Medium" | "Hard";
   numberOfPlays: number;
   rating: number;
   estimatedTime: number;
@@ -22,64 +21,69 @@ interface FavouriteQuiz {
 
 export default function FavouriteQuizzes() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTopic, setSelectedTopic] = useState('all');
+  const [selectedTopic, setSelectedTopic] = useState("all");
 
   // Mock data - sẽ thay thế bằng API call thực tế
   const favouriteQuizzes: FavouriteQuiz[] = [
     {
-      id: '1',
-      title: 'Kiểm tra Toán học lớp 10',
-      description: 'Bài kiểm tra về đại số và hình học cơ bản',
-      topic: 'Toán học',
-      difficulty: 'Medium',
+      id: "1",
+      title: "Kiểm tra Toán học lớp 10",
+      description: "Bài kiểm tra về đại số và hình học cơ bản",
+      topic: "Toán học",
+      difficulty: "Medium",
       numberOfPlays: 1247,
       rating: 4.8,
       estimatedTime: 30,
-      addedAt: '2024-10-01',
-      author: 'Nguyễn Văn Giáo viên',
+      addedAt: "2024-10-01",
+      author: "Nguyễn Văn Giáo viên",
     },
     {
-      id: '2',
-      title: 'Quiz Vật lý - Điện học',
-      description: 'Câu hỏi về dòng điện và từ trường',
-      topic: 'Vật lý',
-      difficulty: 'Hard',
+      id: "2",
+      title: "Quiz Vật lý - Điện học",
+      description: "Câu hỏi về dòng điện và từ trường",
+      topic: "Vật lý",
+      difficulty: "Hard",
       numberOfPlays: 892,
       rating: 4.6,
       estimatedTime: 45,
-      addedAt: '2024-09-28',
-      author: 'Trần Thị Giáo viên',
+      addedAt: "2024-09-28",
+      author: "Trần Thị Giáo viên",
     },
     {
-      id: '3',
-      title: 'Lịch sử Việt Nam',
-      description: 'Các sự kiện lịch sử quan trọng',
-      topic: 'Lịch sử',
-      difficulty: 'Easy',
+      id: "3",
+      title: "Lịch sử Việt Nam",
+      description: "Các sự kiện lịch sử quan trọng",
+      topic: "Lịch sử",
+      difficulty: "Easy",
       numberOfPlays: 1567,
       rating: 4.9,
       estimatedTime: 20,
-      addedAt: '2024-09-25',
-      author: 'Lê Văn Giáo viên',
+      addedAt: "2024-09-25",
+      author: "Lê Văn Giáo viên",
     },
   ];
 
-  const topics = ['Tất cả', 'Toán học', 'Vật lý', 'Hóa học', 'Lịch sử', 'Địa lý', 'Văn học'];
+  const topics = [
+    "Tất cả",
+    "Toán học",
+    "Vật lý",
+    "Hóa học",
+    "Lịch sử",
+    "Địa lý",
+    "Văn học",
+  ];
 
-  const filteredQuizzes = favouriteQuizzes.filter(quiz => {
-    const matchesSearch = quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         quiz.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         quiz.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTopic = selectedTopic === 'all' || quiz.topic === selectedTopic;
-    return matchesSearch && matchesTopic;
+  const filteredQuizzes = favouriteQuizzes.filter((quiz) => {
+    const matchesTopic =
+      selectedTopic === "all" || quiz.topic === selectedTopic;
+    return matchesTopic;
   });
 
   // rút gọn hiển thị như card đơn giản
 
   const handleRemoveFavourite = (quizId: string) => {
     // TODO: Call remove favourite API
-    console.log('Remove favourite:', quizId);
+    console.log("Remove favourite:", quizId);
   };
 
   return (
@@ -101,40 +105,26 @@ export default function FavouriteQuizzes() {
       </div>
 
       <div className="container mx-auto px-6 py-8 flex-1">
-        {/* Filters */}
-        <div className="card mb-8">
-          <div className="card-content">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <Input
-                  placeholder="Tìm kiếm quiz yêu thích..."
-                  icon={<Search size={16} />}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <div>
-                <select
-                  className="input"
-                  value={selectedTopic}
-                  onChange={(e) => setSelectedTopic(e.target.value)}
-                >
-                  {topics.map(topic => (
-                    <option key={topic} value={topic === 'Tất cả' ? 'all' : topic}>
-                      {topic}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+        {/* Results Count & Filter Bar */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <p className="text-lg font-medium text-secondary-900">
+              {filteredQuizzes.length} quiz yêu thích
+            </p>
           </div>
-        </div>
-
-        {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-secondary-600">
-            {filteredQuizzes.length} quiz yêu thích
-          </p>
+          <div className="w-full sm:w-auto">
+            <select
+              className="input w-full sm:w-64"
+              value={selectedTopic}
+              onChange={(e) => setSelectedTopic(e.target.value)}
+            >
+              {topics.map((topic) => (
+                <option key={topic} value={topic === "Tất cả" ? "all" : topic}>
+                  {topic}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Quiz Grid (simplified card) */}

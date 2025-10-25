@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  Search,
-  Filter,
   BookOpen,
   Calendar,
   Clock,
@@ -13,7 +11,6 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Button } from "../../../components/common/Button";
-import { Input } from "../../../components/common/Input";
 
 interface QuizHistory {
   id: string;
@@ -31,7 +28,6 @@ interface QuizHistory {
 }
 
 export default function StudentHistory() {
-  const [searchTerm, setSearchTerm] = useState("");
   const [filterTopic, setFilterTopic] = useState("all");
   const [filterScore, setFilterScore] = useState("all");
 
@@ -102,9 +98,6 @@ export default function StudentHistory() {
   ];
 
   const filteredHistory = history.filter((quiz) => {
-    const matchesSearch =
-      quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quiz.topic.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTopic = filterTopic === "all" || quiz.topic === filterTopic;
     const matchesScore =
       filterScore === "all" ||
@@ -112,7 +105,7 @@ export default function StudentHistory() {
       (filterScore === "good" && quiz.score >= 70 && quiz.score < 90) ||
       (filterScore === "average" && quiz.score >= 50 && quiz.score < 70) ||
       (filterScore === "poor" && quiz.score < 50);
-    return matchesSearch && matchesTopic && matchesScore;
+    return matchesTopic && matchesScore;
   });
 
   const getScoreColor = (score: number) => {
@@ -252,14 +245,6 @@ export default function StudentHistory() {
         <div className="card-content">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <Input
-                placeholder="Tìm kiếm quiz..."
-                icon={<Search size={16} />}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="md:w-48">
               <select
                 className="input"
                 value={filterTopic}

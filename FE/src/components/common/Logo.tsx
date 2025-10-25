@@ -61,7 +61,7 @@ export const Logo: React.FC<LogoProps> = ({
               }
         }
       >
-        QuizViet
+        EduQuiz
       </span>
     </Link>
   );

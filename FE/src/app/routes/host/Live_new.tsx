@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Play, Pause, SkipForward, Users, X, BarChart3 } from "lucide-react";
 import { Button } from "../../../components/common/Button";
@@ -30,8 +30,6 @@ interface PlayerStats {
 export default function HostLive() {
   const navigate = useNavigate();
   const { quizId } = useParams();
-
-  console.log("HostLive - quizId:", quizId);
 
   // Mock quiz data
   const mockQuestions: Question[] = [
@@ -154,12 +152,8 @@ export default function HostLive() {
   };
 
   const handleEndQuiz = () => {
-    if (
-      window.confirm(
-        "Bạn có chắc muốn kết thúc quiz sớm? Kết quả sẽ được lưu lại."
-      )
-    ) {
-      navigate(`/host/results/${quizId}`);
+    if (window.confirm("Bạn có chắc muốn kết thúc quiz?")) {
+      navigate(`/teacher/history`);
     }
   };
 

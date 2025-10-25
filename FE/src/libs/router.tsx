@@ -29,7 +29,7 @@ import StudentHistory from "../app/routes/student/History";
 // Host/Play routes
 import HostLobby from "../app/routes/host/Lobby";
 import HostLive from "../app/routes/host/Live";
-import HostLeaderboard from "../app/routes/host/Leaderboard";
+import HostResults from "../app/routes/host/Results";
 import JoinByPin from "../app/routes/play/JoinByPin";
 import PlayLive from "../app/routes/play/Live";
 import PlayResult from "../app/routes/play/Result";
@@ -44,6 +44,7 @@ import QuizPreview from "../app/routes/quiz/Preview";
 import Profile from "../app/routes/Profile";
 import CreateQuiz from "../app/routes/quiz/CreateQuiz";
 import EditQuiz from "../app/routes/quiz/EditQuiz";
+import SoloResult from "../app/routes/quiz/SoloResult";
 
 export const router = createBrowserRouter(
   [
@@ -109,17 +110,37 @@ export const router = createBrowserRouter(
     },
     {
       path: "/host",
-      element: (
-        <RequireAuth>
-          <RequireRole roles={["Teacher"]}>
-            <HostLobby />
-          </RequireRole>
-        </RequireAuth>
-      ),
       children: [
-        { path: "lobby/:sessionId", element: <HostLobby /> },
-        { path: "live/:sessionId", element: <HostLive /> },
-        { path: "leaderboard/:sessionId", element: <HostLeaderboard /> },
+        {
+          path: "lobby/:quizId",
+          element: (
+            <RequireAuth>
+              <RequireRole roles={["Teacher"]}>
+                <HostLobby />
+              </RequireRole>
+            </RequireAuth>
+          ),
+        },
+        {
+          path: "live/:quizId",
+          element: (
+            <RequireAuth>
+              <RequireRole roles={["Teacher"]}>
+                <HostLive />
+              </RequireRole>
+            </RequireAuth>
+          ),
+        },
+        {
+          path: "results/:quizId",
+          element: (
+            <RequireAuth>
+              <RequireRole roles={["Teacher"]}>
+                <HostResults />
+              </RequireRole>
+            </RequireAuth>
+          ),
+        },
       ],
     },
     {
@@ -131,6 +152,7 @@ export const router = createBrowserRouter(
       ],
     },
     { path: "/quiz/preview/:quizId", element: <QuizPreview /> },
+    { path: "/quiz/result/:quizId", element: <SoloResult /> },
     { path: "/search", element: <BrowseQuizzes /> },
     {
       path: "/favourites",

@@ -1,19 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  Search,
-  Filter,
   BookOpen,
   Calendar,
-  Clock,
   Trophy,
   Target,
   Users,
-  Eye,
   BarChart3,
-  TrendingUp,
 } from "lucide-react";
-import { Button } from "../../../components/common/Button";
-import { Input } from "../../../components/common/Input";
 
 interface TeacherQuizHistory {
   id: string;
@@ -39,7 +32,6 @@ interface QuizLeaderboard {
 }
 
 export default function TeacherHistory() {
-  const [searchTerm, setSearchTerm] = useState("");
   const [filterTopic, setFilterTopic] = useState("all");
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
 
@@ -154,11 +146,8 @@ export default function TeacherHistory() {
   ];
 
   const filteredHistory = quizHistory.filter((quiz) => {
-    const matchesSearch = quiz.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
     const matchesTopic = filterTopic === "all" || quiz.topic === filterTopic;
-    return matchesSearch && matchesTopic;
+    return matchesTopic;
   });
 
   const selectedQuizData = selectedQuiz ? leaderboards[selectedQuiz] : null;
@@ -266,14 +255,6 @@ export default function TeacherHistory() {
         <div className="card-content">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <Input
-                placeholder="Tìm kiếm quiz..."
-                icon={<Search size={16} />}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="md:w-48">
               <select
                 className="input"
                 value={filterTopic}

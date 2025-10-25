@@ -132,7 +132,7 @@ export default function Landing() {
           >
             <div className="text-center text-white">
               <h1 className="text-4xl md:text-5xl font-extrabold drop-shadow-sm mb-3">
-                Chào mừng đến với QuizViet!
+                Chào mừng đến với EduQuiz!
               </h1>
               <p className="text-white/95 max-w-3xl mx-auto">
                 Nền tảng học tập tương tác hàng đầu Việt Nam. Khám phá hàng

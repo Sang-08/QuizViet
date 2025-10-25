@@ -53,3 +53,30 @@ export interface CreateQuizRequest {
 export interface UpdateQuizRequest extends Partial<CreateQuizRequest> {
   quizId: number;
 }
+
+// Interface for Quiz in Group (from API response)
+export interface DeliveredQuiz {
+  quizId: number;
+  avatarURL: string;
+  totalQuestions: number;
+}
+
+export interface QuizInGroup {
+  qgId: number;
+  deliveredQuiz: DeliveredQuiz;
+  title: string;
+  teacherName: string;
+  dateCreated: string;
+  expiredDate: string;
+  message: string;
+}
+
+export interface QuizGroup_API {
+  groupId: number;
+  teacherId: number;
+  groupName: string;
+  groupDescription: string;
+  idUnique: string;
+  createAt: string;
+  quizzes: QuizInGroup[];
+}

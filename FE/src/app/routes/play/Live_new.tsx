@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Users, Clock } from "lucide-react";
+import { Trophy, Users, Clock } from "lucide-react";
 
 interface Question {
   id: string;
@@ -14,10 +14,6 @@ interface Question {
 export default function PlayLive() {
   const navigate = useNavigate();
   const { sessionId } = useParams();
-
-  // Detect if this is solo/practice mode (from preview) or live mode
-  const isSoloMode = sessionId?.startsWith("solo-");
-  const quizId = isSoloMode ? sessionId?.replace("solo-", "") : null;
 
   // Mock quiz data - same as host
   const mockQuestions: Question[] = [
@@ -57,7 +53,7 @@ export default function PlayLive() {
   const [timeLeft, setTimeLeft] = useState(mockQuestions[0].timeLimit);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(0); // Hidden from UI, will be shown in Results page
+  const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
 
   const currentQuestion = mockQuestions[currentQuestionIndex];
@@ -92,8 +88,14 @@ export default function PlayLive() {
       const isCorrect = answerIndex === currentQuestion.correctAnswer;
 
       if (isCorrect) {
-        // Simple scoring: 10 points per correct answer
-        setScore((prev) => prev + 10);
+        // Calculate score based on time
+        const timeBonus = Math.floor(
+          (timeLeft / currentQuestion.timeLimit) * 500
+        );
+        const basePoints = currentQuestion.points;
+        const streakBonus = streak * 100;
+        const earnedPoints = basePoints + timeBonus + streakBonus;
+        setScore((prev) => prev + earnedPoints);
         setStreak((prev) => prev + 1);
       } else {
         setStreak(0);
@@ -111,14 +113,8 @@ export default function PlayLive() {
       setSelectedAnswer(null);
       setShowResult(false);
     } else {
-      // End quiz - go to appropriate results page
-      if (isSoloMode && quizId) {
-        // Solo/Practice mode - go to solo result (no leaderboard)
-        navigate(`/quiz/result/${quizId}`);
-      } else {
-        // Live mode - go to live result (with leaderboard)
-        navigate(`/play/result/${sessionId}`);
-      }
+      // End quiz - go to results page
+      navigate(`/play/result/${sessionId}`);
     }
   };
 
@@ -172,6 +168,12 @@ export default function PlayLive() {
         <div className="bg-black/30 backdrop-blur-md px-4 md:px-8 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-white">
+                <Trophy className="w-5 h-5 md:w-6 md:h-6" />
+                <span className="text-lg md:text-2xl font-black">
+                  {score.toLocaleString()}
+                </span>
+              </div>
               {streak > 0 && (
                 <div className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full">
                   <span className="text-sm font-bold">🔥 {streak} streak</span>
@@ -264,8 +266,11 @@ export default function PlayLive() {
             <div className="mt-8 text-center animate-fadeIn">
               {selectedAnswer === currentQuestion.correctAnswer ? (
                 <div className="bg-green-500/90 backdrop-blur-md rounded-2xl px-8 py-6 inline-block">
-                  <p className="text-3xl md:text-4xl font-black text-white">
+                  <p className="text-3xl md:text-4xl font-black text-white mb-2">
                     🎉 Chính xác!
+                  </p>
+                  <p className="text-lg md:text-xl text-white/90">
+                    +{currentQuestion.points} điểm
                   </p>
                 </div>
               ) : selectedAnswer !== null ? (

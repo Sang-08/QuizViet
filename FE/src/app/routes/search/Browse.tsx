@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { Button } from "../../../components/common/Button";
-import { Input } from "../../../components/common/Input";
 import { QuizCard } from "../../../components/common/QuizCard";
 import { TopNavbar } from "../../../components/layout/TopNavbar";
 import { Footer } from "../../../components/layout/Footer";
@@ -23,7 +22,6 @@ interface Quiz {
 
 export default function BrowseQuizzes() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
 
@@ -82,15 +80,11 @@ export default function BrowseQuizzes() {
   const difficulties = ["Tất cả", "Easy", "Medium", "Hard"];
 
   const filteredQuizzes = quizzes.filter((quiz) => {
-    const matchesSearch =
-      quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quiz.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quiz.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTopic =
       selectedTopic === "all" || quiz.topic === selectedTopic;
     const matchesDifficulty =
       selectedDifficulty === "all" || quiz.difficulty === selectedDifficulty;
-    return matchesSearch && matchesTopic && matchesDifficulty;
+    return matchesTopic && matchesDifficulty;
   });
 
   // bỏ rating/difficulty để card tối giản theo thiết kế
@@ -116,12 +110,12 @@ export default function BrowseQuizzes() {
           <div className="card-content">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">
-                <Input
-                  placeholder="Tìm kiếm quiz, tác giả..."
-                  icon={<Search size={16} />}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <h3 className="text-lg font-semibold text-secondary-900">
+                  Khám phá quiz
+                </h3>
+                <p className="text-sm text-secondary-600 mt-1">
+                  Tìm quiz phù hợp với bạn
+                </p>
               </div>
               <div>
                 <select

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, User as UserIcon, Phone, Building2 } from "lucide-react";
+import { Mail, Lock, User as UserIcon, MapPin, Building2 } from "lucide-react";
 import { Button } from "../../../components/common/Button";
 import { Input } from "../../../components/common/Input";
 import { Spinner } from "../../../components/common/Spinner";
@@ -19,7 +19,7 @@ const registerSchema = z
     role: z.enum(["Student", "Teacher"], {
       required_error: "Vui lòng chọn vai trò",
     }),
-    phoneNumber: z.string().optional(),
+    address: z.string().optional(),
     organizationName: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -153,15 +153,15 @@ export default function Register() {
                 />
               </div>
 
-              {/* Teacher only fields (không có địa chỉ) */}
+              {/* Teacher only fields */}
               {currentRole === "Teacher" && (
                 <>
                   <Input
-                    label="Số điện thoại"
-                    placeholder="0123456789"
-                    icon={<Phone size={16} />}
+                    label="Địa chỉ"
+                    placeholder="Nhập địa chỉ của Trường/Tổ chức"
+                    icon={<MapPin size={16} />}
                     error={undefined}
-                    {...register("phoneNumber")}
+                    {...register("address")}
                   />
                   <Input
                     label="Tên trường/tổ chức"

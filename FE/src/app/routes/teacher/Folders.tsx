@@ -8,10 +8,6 @@ import {
   Edit,
   BookOpen,
   Play,
-  Search,
-  Filter,
-  Grid3x3,
-  List,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
@@ -26,6 +22,7 @@ interface FolderType {
   quizCount: number;
   createdAt: string;
   color?: string;
+  parentId?: string | null;
 }
 
 interface Quiz {
@@ -44,14 +41,18 @@ export default function TeacherFolders() {
   const navigate = useNavigate();
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<string | null>("all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [searchTerm, setSearchTerm] = useState("");
   const [isFoldersExpanded, setIsFoldersExpanded] = useState(true);
   const [editingFolder, setEditingFolder] = useState<FolderType | null>(null);
   const [editFolderName, setEditFolderName] = useState("");
   const [editFolderDescription, setEditFolderDescription] = useState("");
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set()
+  );
+  const [parentFolderForNew, setParentFolderForNew] = useState<string | null>(
+    null
+  );
 
-  // Mock data - Folders
+  // Mock data - Folders (with hierarchical structure)
   const folders: FolderType[] = [
     {
       id: "1",
@@ -60,6 +61,25 @@ export default function TeacherFolders() {
       quizCount: 8,
       createdAt: "2024-09-01",
       color: "bg-blue-500",
+      parentId: null,
+    },
+    {
+      id: "1-1",
+      name: "Đại số",
+      description: "Các chủ đề về đại số",
+      quizCount: 4,
+      createdAt: "2024-09-02",
+      color: "bg-blue-400",
+      parentId: "1",
+    },
+    {
+      id: "1-2",
+      name: "Hình học",
+      description: "Các chủ đề về hình học",
+      quizCount: 4,
+      createdAt: "2024-09-03",
+      color: "bg-blue-400",
+      parentId: "1",
     },
     {
       id: "2",
@@ -68,6 +88,16 @@ export default function TeacherFolders() {
       quizCount: 5,
       createdAt: "2024-09-05",
       color: "bg-purple-500",
+      parentId: null,
+    },
+    {
+      id: "2-1",
+      name: "Cơ học",
+      description: "Chủ đề cơ học",
+      quizCount: 3,
+      createdAt: "2024-09-06",
+      color: "bg-purple-400",
+      parentId: "2",
     },
     {
       id: "3",
@@ -76,6 +106,7 @@ export default function TeacherFolders() {
       quizCount: 6,
       createdAt: "2024-09-10",
       color: "bg-green-500",
+      parentId: null,
     },
     {
       id: "4",
@@ -84,6 +115,7 @@ export default function TeacherFolders() {
       quizCount: 4,
       createdAt: "2024-09-15",
       color: "bg-orange-500",
+      parentId: null,
     },
   ];
 
@@ -189,26 +221,60 @@ export default function TeacherFolders() {
     quizCount: getQuizCountByFolder(folder.id),
   }));
 
-  // Filter quizzes based on selected folder (only show quizzes when a specific folder is selected)
+  // Get subfolders of current selected folder
+  const currentSubfolders =
+    selectedFolder === "all"
+      ? folders.filter((f) => f.parentId === null)
+      : folders.filter((f) => f.parentId === selectedFolder);
+
+  // Filter quizzes based on selected folder
   const filteredQuizzes =
     selectedFolder === "all"
       ? []
       : quizzes.filter((q) => q.folderId === selectedFolder);
 
-  // Show folders or quizzes based on selection
-  const showFolders = selectedFolder === "all";
+  // Show folders when: at root level OR current folder has subfolders
+  const showFolders = selectedFolder === "all" || currentSubfolders.length > 0;
+
+  // Show quizzes when: not at root level (có thể có quiz ở bất kỳ level nào trừ root)
   const showQuizzes = selectedFolder !== "all";
+
+  // Helper functions
+  const toggleFolderExpand = (folderId: string) => {
+    const newExpanded = new Set(expandedFolders);
+    if (newExpanded.has(folderId)) {
+      newExpanded.delete(folderId);
+    } else {
+      newExpanded.add(folderId);
+    }
+    setExpandedFolders(newExpanded);
+  };
+
+  const getSubfolders = (parentId: string | null) => {
+    return folders.filter((f) => f.parentId === parentId);
+  };
+
+  const hasSubfolders = (folderId: string) => {
+    return folders.some((f) => f.parentId === folderId);
+  };
 
   const handleCreateFolder = () => {
     if (newFolderName.trim()) {
       console.log("Create folder:", {
         name: newFolderName,
         description: newFolderDescription,
+        parentId: parentFolderForNew,
       });
       setShowCreateFolderModal(false);
       setNewFolderName("");
       setNewFolderDescription("");
+      setParentFolderForNew(null);
     }
+  };
+
+  const openCreateFolderModal = (parentId: string | null = null) => {
+    setParentFolderForNew(parentId);
+    setShowCreateFolderModal(true);
   };
 
   const handleEditFolder = (folder: FolderType) => {
@@ -239,6 +305,93 @@ export default function TeacherFolders() {
     setSelectedFolder("all");
   };
 
+  // Recursive function to render folder tree
+  const renderFolderTree = (
+    parentId: string | null,
+    level: number
+  ): JSX.Element[] => {
+    const subfolders = getSubfolders(parentId);
+
+    return subfolders.map((folder) => {
+      const isExpanded = expandedFolders.has(folder.id);
+      const hasSub = hasSubfolders(folder.id);
+      const isSelected = selectedFolder === folder.id;
+
+      return (
+        <div key={folder.id}>
+          {/* Folder Item */}
+          <div className="relative group">
+            <button
+              className={`w-full px-3 py-2.5 rounded-lg text-left text-sm font-medium transition-all ${
+                isSelected
+                  ? "bg-primary-50 text-primary-700 border-l-4 border-primary-600"
+                  : "text-secondary-700 hover:bg-secondary-50"
+              }`}
+              style={{ paddingLeft: `${12 + level * 16}px` }}
+              onClick={() => setSelectedFolder(folder.id)}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {/* Expand/Collapse Button */}
+                  {hasSub && (
+                    <button
+                      className="p-0.5 hover:bg-secondary-200 rounded transition-colors flex-shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFolderExpand(folder.id);
+                      }}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  )}
+                  {!hasSub && <div className="w-5" />}
+
+                  <Folder
+                    className={`w-4 h-4 flex-shrink-0 ${
+                      isSelected ? "text-primary-600" : "text-secondary-500"
+                    }`}
+                  />
+                  <span className="truncate">{folder.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
+                      isSelected
+                        ? "bg-primary-100 text-primary-700"
+                        : "bg-secondary-100 text-secondary-600"
+                    }`}
+                  >
+                    {folder.quizCount}
+                  </span>
+                  {/* Add Subfolder Button */}
+                  <button
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-secondary-200 rounded transition-all flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openCreateFolderModal(folder.id);
+                    }}
+                    title="Tạo thư mục con"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-secondary-600" />
+                  </button>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Render Subfolders */}
+          {hasSub && isExpanded && (
+            <div className="mt-1">{renderFolderTree(folder.id, level + 1)}</div>
+          )}
+        </div>
+      );
+    });
+  };
+
   return (
     <div className="w-full">
       {/* Header */}
@@ -251,10 +404,13 @@ export default function TeacherFolders() {
             Quản lý và tổ chức tất cả quiz của bạn
           </p>
         </div>
-        <Button onClick={() => navigate("/quiz/create")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Tạo quiz mới
-        </Button>
+        {/* Show Create Folder button only at root level */}
+        {selectedFolder === "all" && (
+          <Button onClick={() => setShowCreateFolderModal(true)}>
+            <FolderPlus className="w-4 h-4 mr-2" />
+            Tạo thư mục
+          </Button>
+        )}
       </div>
 
       {/* Layout with sidebar + content */}
@@ -321,39 +477,7 @@ export default function TeacherFolders() {
               {/* Folders List - Collapsible with scroll */}
               {isFoldersExpanded && (
                 <div className="space-y-1 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
-                  {foldersWithCounts.map((folder) => (
-                    <button
-                      key={folder.id}
-                      className={`w-full px-3 py-2.5 rounded-lg text-left text-sm font-medium transition-all ${
-                        selectedFolder === folder.id
-                          ? "bg-primary-50 text-primary-700 border-l-4 border-primary-600"
-                          : "text-secondary-700 hover:bg-secondary-50"
-                      }`}
-                      onClick={() => setSelectedFolder(folder.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <Folder
-                            className={`w-4 h-4 flex-shrink-0 ${
-                              selectedFolder === folder.id
-                                ? "text-primary-600"
-                                : "text-secondary-500"
-                            }`}
-                          />
-                          <span className="truncate">{folder.name}</span>
-                        </div>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ml-2 ${
-                            selectedFolder === folder.id
-                              ? "bg-primary-100 text-primary-700"
-                              : "bg-secondary-100 text-secondary-600"
-                          }`}
-                        >
-                          {folder.quizCount}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                  {renderFolderTree(null, 0)}
                 </div>
               )}
             </div>
@@ -362,47 +486,27 @@ export default function TeacherFolders() {
 
         {/* Main Content */}
         <div className="space-y-6">
-          {/* Search and Filter Bar */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-secondary-400" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm quiz..."
-                  className="input pl-10 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
+          {/* Action Bar */}
+          <div className="flex justify-end items-center">
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
-                Lọc
-              </Button>
-              <div className="flex border border-secondary-200 rounded-lg overflow-hidden">
-                <button
-                  className={`px-3 py-2 ${
-                    viewMode === "grid"
-                      ? "bg-primary-50 text-primary-600"
-                      : "bg-white text-secondary-600"
-                  }`}
-                  onClick={() => setViewMode("grid")}
+              {/* Show Create Subfolder button only when not at root */}
+              {selectedFolder !== "all" && (
+                <Button
+                  onClick={() => openCreateFolderModal(selectedFolder)}
+                  variant="outline"
                 >
-                  <Grid3x3 className="w-4 h-4" />
-                </button>
-                <button
-                  className={`px-3 py-2 ${
-                    viewMode === "list"
-                      ? "bg-primary-50 text-primary-600"
-                      : "bg-white text-secondary-600"
-                  }`}
-                  onClick={() => setViewMode("list")}
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </div>
+                  <FolderPlus className="w-4 h-4 mr-2" />
+                  Tạo thư mục con
+                </Button>
+              )}
+
+              {/* Show Create Quiz button only when not at root */}
+              {selectedFolder !== "all" && (
+                <Button onClick={() => navigate("/quiz/create")}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Tạo Quiz
+                </Button>
+              )}
             </div>
           </div>
 
@@ -456,9 +560,9 @@ export default function TeacherFolders() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {/* Show Folders when "all" is selected */}
+              {/* Show Folders (root or subfolders) */}
               {showFolders &&
-                foldersWithCounts.map((folder) => (
+                currentSubfolders.map((folder) => (
                   <div
                     key={folder.id}
                     className="group rounded-2xl overflow-hidden border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white cursor-pointer"
@@ -584,45 +688,6 @@ export default function TeacherFolders() {
                     </div>
                   </div>
                 ))}
-
-              {/* Create New Card - Folder or Quiz based on view */}
-              {showFolders && (
-                <div
-                  className="rounded-2xl border-2 border-dashed border-secondary-300 hover:border-primary-400 hover:bg-primary-50/50 transition-all cursor-pointer flex items-center justify-center min-h-[280px]"
-                  onClick={() => setShowCreateFolderModal(true)}
-                >
-                  <div className="text-center p-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
-                      <FolderPlus className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <h3 className="font-semibold text-secondary-900 mb-1">
-                      Tạo thư mục mới
-                    </h3>
-                    <p className="text-sm text-secondary-600">
-                      Tổ chức quiz của bạn
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {showQuizzes && (
-                <div
-                  className="rounded-2xl border-2 border-dashed border-secondary-300 hover:border-primary-400 hover:bg-primary-50/50 transition-all cursor-pointer flex items-center justify-center min-h-[280px]"
-                  onClick={() => navigate("/quiz/create")}
-                >
-                  <div className="text-center p-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary-100 flex items-center justify-center">
-                      <Plus className="w-8 h-8 text-primary-600" />
-                    </div>
-                    <h3 className="font-semibold text-secondary-900 mb-1">
-                      Tạo quiz mới
-                    </h3>
-                    <p className="text-sm text-secondary-600">
-                      Bắt đầu tạo quiz của bạn
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -631,10 +696,21 @@ export default function TeacherFolders() {
       {/* Create Folder Modal */}
       <Modal
         isOpen={showCreateFolderModal}
-        onClose={() => setShowCreateFolderModal(false)}
-        title="Tạo thư mục mới"
+        onClose={() => {
+          setShowCreateFolderModal(false);
+          setParentFolderForNew(null);
+        }}
+        title={parentFolderForNew ? "Tạo thư mục con" : "Tạo thư mục mới"}
       >
         <div className="space-y-4">
+          {parentFolderForNew && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <span className="font-medium">Thư mục cha:</span>{" "}
+                {folders.find((f) => f.id === parentFolderForNew)?.name}
+              </p>
+            </div>
+          )}
           <Input
             label="Tên thư mục"
             placeholder="Nhập tên thư mục"
@@ -650,11 +726,16 @@ export default function TeacherFolders() {
           <div className="flex justify-end space-x-3">
             <Button
               variant="outline"
-              onClick={() => setShowCreateFolderModal(false)}
+              onClick={() => {
+                setShowCreateFolderModal(false);
+                setParentFolderForNew(null);
+              }}
             >
               Hủy
             </Button>
-            <Button onClick={handleCreateFolder}>Tạo thư mục</Button>
+            <Button onClick={handleCreateFolder}>
+              {parentFolderForNew ? "Tạo thư mục con" : "Tạo thư mục"}
+            </Button>
           </div>
         </div>
       </Modal>
