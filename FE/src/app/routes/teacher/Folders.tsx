@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FolderPlus,
@@ -10,6 +10,7 @@ import {
   Play,
   ChevronDown,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import { Button } from "../../../components/common/Button";
 import { Modal } from "../../../components/common/Modal";
@@ -51,6 +52,9 @@ export default function TeacherFolders() {
   const [parentFolderForNew, setParentFolderForNew] = useState<string | null>(
     null
   );
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState<FolderType | null>(null);
 
   // Mock data - Folders (with hierarchical structure)
   const folders: FolderType[] = [
@@ -210,6 +214,20 @@ export default function TeacherFolders() {
   const [newFolderName, setNewFolderName] = useState("");
   const [newFolderDescription, setNewFolderDescription] = useState("");
 
+  // Close dropdown menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (openMenuId) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [openMenuId]);
+
   // Calculate actual quiz count for each folder
   const getQuizCountByFolder = (folderId: string) => {
     return quizzes.filter((q) => q.folderId === folderId).length;
@@ -303,6 +321,27 @@ export default function TeacherFolders() {
     setEditFolderName("");
     setEditFolderDescription("");
     setSelectedFolder("all");
+  };
+
+  const handleDeleteFolder = (folder: FolderType) => {
+    setFolderToDelete(folder);
+    setShowDeleteModal(true);
+    setOpenMenuId(null);
+  };
+
+  const confirmDeleteFolder = () => {
+    if (folderToDelete) {
+      console.log("Delete folder:", folderToDelete.id);
+      // TODO: API call to delete folder
+      setShowDeleteModal(false);
+      setFolderToDelete(null);
+      setSelectedFolder("all");
+    }
+  };
+
+  const toggleMenu = (folderId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpenMenuId(openMenuId === folderId ? null : folderId);
   };
 
   // Recursive function to render folder tree
@@ -565,12 +604,38 @@ export default function TeacherFolders() {
                 currentSubfolders.map((folder) => (
                   <div
                     key={folder.id}
-                    className="group rounded-2xl overflow-hidden border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white cursor-pointer"
+                    className="group rounded-2xl overflow-hidden border border-secondary-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white cursor-pointer relative"
                     onClick={() => setSelectedFolder(folder.id)}
                   >
                     {/* Folder Cover */}
                     <div className="h-40 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 flex items-center justify-center relative">
                       <Folder className="w-20 h-20 text-blue-500 opacity-80" />
+
+                      {/* 3-dot Menu Button */}
+                      <div className="absolute top-3 right-3">
+                        <button
+                          className="p-2 bg-white/80 backdrop-blur-sm rounded-lg hover:bg-white transition-colors opacity-0 group-hover:opacity-100"
+                          onClick={(e) => toggleMenu(folder.id, e)}
+                        >
+                          <MoreVertical className="w-4 h-4 text-secondary-600" />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {openMenuId === folder.id && (
+                          <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-secondary-200 py-1 z-10">
+                            <button
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteFolder(folder);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Xóa thư mục
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Folder Info */}
@@ -604,16 +669,6 @@ export default function TeacherFolders() {
                       >
                         <Edit className="w-3 h-3 mr-1" />
                         Sửa
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // More options
-                        }}
-                      >
-                        <MoreVertical className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
@@ -668,7 +723,7 @@ export default function TeacherFolders() {
                         className="flex-1"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/host/lobby/${quiz.id}`);
+                          navigate(`/quiz/preview/${quiz.id}`);
                         }}
                       >
                         <Play className="w-3 h-3 mr-1" />
@@ -735,6 +790,48 @@ export default function TeacherFolders() {
             </Button>
             <Button onClick={handleCreateFolder}>
               {parentFolderForNew ? "Tạo thư mục con" : "Tạo thư mục"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Folder Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setFolderToDelete(null);
+        }}
+        title="Xác nhận xóa thư mục"
+      >
+        <div className="space-y-4">
+          <p className="text-secondary-700">
+            Bạn có chắc chắn muốn xóa thư mục{" "}
+            <span className="font-semibold text-secondary-900">
+              "{folderToDelete?.name}"
+            </span>
+            ?
+          </p>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <p className="text-sm text-amber-800">
+              ⚠️ Hành động này sẽ xóa tất cả quiz và thư mục con bên trong.
+            </p>
+          </div>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteModal(false);
+                setFolderToDelete(null);
+              }}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={confirmDeleteFolder}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Xóa thư mục
             </Button>
           </div>
         </div>

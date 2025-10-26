@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Clock,
   ChevronLeft,
@@ -15,6 +15,11 @@ import { storage } from "../../../libs/storage";
 export default function QuizPreview() {
   const navigate = useNavigate();
   const { quizId } = useParams();
+  const [searchParams] = useSearchParams();
+
+  // Check if this quiz is from a class
+  const classId = searchParams.get("classId");
+  const fromClass = classId !== null;
 
   // Get current user to check role
   const currentUser = storage.getUser();
@@ -65,13 +70,19 @@ export default function QuizPreview() {
   };
 
   const handleStart = () => {
-    // Solo/Practice mode - học sinh làm bài một mình
-    navigate(`/play/live/solo-${quiz.id}`);
+    if (fromClass && classId) {
+      // Quiz from class - will show leaderboard after completion
+      navigate(`/play/live/class-${classId}-${quiz.id}`);
+    } else {
+      // Solo/Practice mode - will show personal result
+      navigate(`/play/live/solo-${quiz.id}`);
+    }
   };
 
   const handleHostLive = () => {
-    // Giáo viên tổ chức live - chuyển đến trang phòng chờ
-    navigate(`/host/lobby/${quiz.id}`);
+    // Giáo viên tổ chức live - chuyển đến trang phòng chờ (shared lobby)
+    // Pass state to indicate this is the host/creator
+    navigate(`/lobby/${quiz.id}`, { state: { isHost: true } });
   };
 
   return (

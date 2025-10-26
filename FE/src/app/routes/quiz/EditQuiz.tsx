@@ -23,7 +23,7 @@ import { Spinner } from "../../../components/common/Spinner";
 
 const questionSchema = z.object({
   content: z.string().min(5, "Nội dung câu hỏi phải có ít nhất 5 ký tự"),
-  questionType: z.enum(["MultipleChoice", "TrueFalse", "FillInBlank"]),
+  questionType: z.enum(["MultipleChoice", "TrueFalse"]),
   timeLimit: z
     .number()
     .min(10, "Thời gian tối thiểu 10 giây")
@@ -60,7 +60,7 @@ interface Option {
 interface Question {
   id: string;
   content: string;
-  questionType: "MultipleChoice" | "TrueFalse" | "FillInBlank";
+  questionType: "MultipleChoice" | "TrueFalse";
   timeLimit: number;
   points: number;
   options: Option[];
@@ -452,9 +452,7 @@ export default function EditQuiz() {
                             <span className="px-2 py-1 bg-secondary-100 text-secondary-700 rounded text-xs">
                               {question.questionType === "MultipleChoice"
                                 ? "Trắc nghiệm"
-                                : question.questionType === "TrueFalse"
-                                ? "Đúng/Sai"
-                                : "Điền khuyết"}
+                                : "Đúng/Sai"}
                             </span>
                           </div>
                           <p className="font-medium text-secondary-900 mb-2">
@@ -572,7 +570,7 @@ interface QuestionModalProps {
 function QuestionModal({ question, onSave, onClose }: QuestionModalProps) {
   const [content, setContent] = useState(question?.content || "");
   const [questionType, setQuestionType] = useState<
-    "MultipleChoice" | "TrueFalse" | "FillInBlank"
+    "MultipleChoice" | "TrueFalse"
   >(question?.questionType || "MultipleChoice");
   const [timeLimit, setTimeLimit] = useState(question?.timeLimit || 30);
   const [points, setPoints] = useState(question?.points || 10);
@@ -668,17 +666,13 @@ function QuestionModal({ question, onSave, onClose }: QuestionModalProps) {
               value={questionType}
               onChange={(e) =>
                 setQuestionType(
-                  e.target.value as
-                    | "MultipleChoice"
-                    | "TrueFalse"
-                    | "FillInBlank"
+                  e.target.value as "MultipleChoice" | "TrueFalse"
                 )
               }
               className="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="MultipleChoice">Trắc nghiệm</option>
               <option value="TrueFalse">Đúng/Sai</option>
-              <option value="FillInBlank">Điền khuyết</option>
             </select>
           </div>
 

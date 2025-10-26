@@ -46,36 +46,56 @@ export default function PlayResult() {
       }>
     | undefined;
 
+  // Detect mode from sessionId pattern
+  const isSoloMode = sessionId?.startsWith("solo-");
+  const isClassMode = sessionId?.startsWith("class-");
+  const isLiveMode = !isSoloMode && !isClassMode;
+
   // Mock data - sẽ thay thế bằng API call thực tế
+  // Trong class mode: hiển thị leaderboard toàn lớp
+  // Trong solo mode: chỉ hiển thị kết quả cá nhân
+  // Trong live mode: hiển thị leaderboard realtime
   const result: FinalResult = {
     myScore: 25, // 10 điểm/câu x 2.5 câu trung bình
     totalQuestions: 3,
     correctAnswers: 2,
     timeSpent: 45, // seconds
     rank: 3,
-    totalPlayers: 20,
+    totalPlayers: isClassMode ? 20 : isSoloMode ? 1 : 20,
     accuracy: 67,
   };
 
-  const leaderboard: LeaderboardEntry[] = [
-    { id: "1", nickname: "Nguyễn Văn Anh", score: 30, rank: 1, isMe: false },
-    { id: "2", nickname: "Trần Thị Bình", score: 30, rank: 2, isMe: false },
-    { id: "3", nickname: "Bạn", score: 20, rank: 3, isMe: true },
-    { id: "4", nickname: "Lê Hoàng Cường", score: 20, rank: 4, isMe: false },
-    { id: "5", nickname: "Phạm Thu Hà", score: 10, rank: 5, isMe: false },
-  ];
-
-  const getRankColor = (rank: number) => {
-    if (rank === 1) return "text-warning-600";
-    if (rank === 2) return "text-secondary-600";
-    if (rank === 3) return "text-warning-700";
-    return "text-secondary-500";
-  };
-
-  const getRankIcon = (rank: number) => {
-    if (rank <= 3) return <Trophy className="w-5 h-5 text-warning-600" />;
-    return null;
-  };
+  // Leaderboard: hiển thị cho class mode và live mode
+  // Solo mode: chỉ hiển thị kết quả riêng của người chơi
+  const leaderboard: LeaderboardEntry[] = isSoloMode
+    ? [
+        {
+          id: "me",
+          nickname: "Bạn",
+          score: result.myScore,
+          rank: 1,
+          isMe: true,
+        },
+      ]
+    : [
+        {
+          id: "1",
+          nickname: "Nguyễn Văn Anh",
+          score: 30,
+          rank: 1,
+          isMe: false,
+        },
+        { id: "2", nickname: "Trần Thị Bình", score: 30, rank: 2, isMe: false },
+        { id: "3", nickname: "Bạn", score: 20, rank: 3, isMe: true },
+        {
+          id: "4",
+          nickname: "Lê Hoàng Cường",
+          score: 20,
+          rank: 4,
+          isMe: false,
+        },
+        { id: "5", nickname: "Phạm Thu Hà", score: 10, rank: 5, isMe: false },
+      ];
 
   const getPerformanceMessage = (score: number) => {
     if (score >= 90) return "Xuất sắc! Bạn đã làm rất tốt!";
@@ -85,36 +105,24 @@ export default function PlayResult() {
     return "Cần cố gắng nhiều hơn!";
   };
 
-  const getPerformanceColor = (score: number) => {
-    if (score >= 90) return "text-success-600";
-    if (score >= 80) return "text-primary-600";
-    if (score >= 70) return "text-warning-600";
-    return "text-error-600";
-  };
-
   const handlePlayAgain = () => {
-    // Nếu sessionId bắt đầu với 'preview-' thì quay lại preview để chơi lại đúng quiz vừa chơi
-    if (sessionId && sessionId.startsWith("preview-")) {
-      const quizId = sessionId.replace("preview-", "");
+    // Solo mode: quay lại preview để chơi lại
+    if (isSoloMode && sessionId) {
+      const quizId = sessionId.replace("solo-", "");
       navigate(`/quiz/preview/${quizId}`);
-    } else {
-      // Nếu là session theo mã PIN thì quay về trang nhập mã PIN
+    }
+    // Class mode: quay về trang lớp học
+    else if (isClassMode) {
+      navigate("/student/classes");
+    }
+    // Live mode: quay về trang nhập mã PIN
+    else {
       navigate("/play/join");
     }
   };
 
   const handleGoHome = () => {
     navigate("/");
-  };
-
-  const handleShare = () => {
-    // TODO: Implement share functionality
-    console.log("Share result");
-  };
-
-  const handleDownload = () => {
-    // TODO: Implement download certificate
-    console.log("Download certificate");
   };
 
   return (
@@ -187,7 +195,7 @@ export default function PlayResult() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* My Results */}
-          <div className="lg:col-span-2">
+          <div className={isSoloMode ? "lg:col-span-3" : "lg:col-span-2"}>
             <div className="card mb-6">
               <div className="card-header">
                 <h3 className="text-lg font-semibold text-secondary-900">
@@ -292,73 +300,75 @@ export default function PlayResult() {
             </div>
           </div>
 
-          {/* Leaderboard */}
-          <div className="lg:col-span-1">
-            <div className="card">
-              <div className="card-header">
-                <h3 className="text-lg font-semibold text-secondary-900">
-                  Bảng xếp hạng cuối
-                </h3>
-              </div>
-              <div className="card-content">
-                <div className="space-y-3">
-                  {leaderboard.map((player) => (
-                    <div
-                      key={player.id}
-                      className={`flex items-center justify-between p-3 rounded-lg ${
-                        player.isMe
-                          ? "bg-primary-50 border border-primary-200"
-                          : "bg-secondary-50"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                            player.rank <= 3
-                              ? player.rank === 1
-                                ? "bg-warning-500 text-white"
-                                : player.rank === 2
-                                ? "bg-secondary-400 text-white"
-                                : "bg-warning-600 text-white"
-                              : "bg-primary-100 text-primary-600"
-                          }`}
-                        >
-                          {player.rank}
-                        </div>
-                        <div>
-                          <p className="font-medium text-secondary-900">
-                            {player.nickname}
-                          </p>
-                          <p className="text-sm text-secondary-500">
-                            {player.score} điểm
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {player.rank <= 3 && (
-                          <Trophy className="w-5 h-5 text-warning-600" />
-                        )}
-                        {player.isMe && (
-                          <Star className="w-4 h-4 text-primary-600" />
-                        )}
-                      </div>
-                    </div>
-                  ))}
+          {/* Leaderboard - Only show for Class and Live modes, hide for Solo mode */}
+          {!isSoloMode && (
+            <div className="lg:col-span-1">
+              <div className="card">
+                <div className="card-header">
+                  <h3 className="text-lg font-semibold text-secondary-900">
+                    Bảng xếp hạng cuối
+                  </h3>
                 </div>
+                <div className="card-content">
+                  <div className="space-y-3">
+                    {leaderboard.map((player) => (
+                      <div
+                        key={player.id}
+                        className={`flex items-center justify-between p-3 rounded-lg ${
+                          player.isMe
+                            ? "bg-primary-50 border border-primary-200"
+                            : "bg-secondary-50"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                              player.rank <= 3
+                                ? player.rank === 1
+                                  ? "bg-warning-500 text-white"
+                                  : player.rank === 2
+                                  ? "bg-secondary-400 text-white"
+                                  : "bg-warning-600 text-white"
+                                : "bg-primary-100 text-primary-600"
+                            }`}
+                          >
+                            {player.rank}
+                          </div>
+                          <div>
+                            <p className="font-medium text-secondary-900">
+                              {player.nickname}
+                            </p>
+                            <p className="text-sm text-secondary-500">
+                              {player.score} điểm
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {player.rank <= 3 && (
+                            <Trophy className="w-5 h-5 text-warning-600" />
+                          )}
+                          {player.isMe && (
+                            <Star className="w-4 h-4 text-primary-600" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
-                <div className="mt-4 pt-4 border-t border-secondary-200">
-                  <div className="text-center">
-                    <p className="text-sm text-secondary-600">
-                      Bạn xếp hạng {result.rank}/{result.totalPlayers}
-                    </p>
-                    <p className="text-xs text-secondary-500 mt-1">
-                      Trong tổng số {result.totalPlayers} người chơi
-                    </p>
+                  <div className="mt-4 pt-4 border-t border-secondary-200">
+                    <div className="text-center">
+                      <p className="text-sm text-secondary-600">
+                        Bạn xếp hạng {result.rank}/{result.totalPlayers}
+                      </p>
+                      <p className="text-xs text-secondary-500 mt-1">
+                        Trong tổng số {result.totalPlayers} người chơi
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

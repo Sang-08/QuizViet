@@ -214,7 +214,7 @@ export default function HostResults() {
   };
 
   const handleBackToHome = () => {
-    navigate("/teacher/history");
+    navigate("/");
   };
 
   return (

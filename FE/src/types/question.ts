@@ -1,7 +1,7 @@
 export interface Question {
   id: number;
   quizId: number;
-  questionType: 'MultipleChoice' | 'TrueFalse' | 'FillInBlank';
+  questionType: "MultipleChoice" | "TrueFalse";
   content: string;
   time?: number; // theo DB là Time (giây)
   points: number;
@@ -22,7 +22,7 @@ export interface Option {
 
 export interface CreateQuestionRequest {
   quizId: number;
-  questionType: 'MultipleChoice' | 'TrueFalse' | 'FillInBlank';
+  questionType: "MultipleChoice" | "TrueFalse";
   content: string;
   time?: number;
   points: number;

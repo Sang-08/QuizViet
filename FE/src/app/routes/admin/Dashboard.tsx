@@ -12,6 +12,7 @@ import {
   Settings,
   Plus,
   PlayCircle,
+  Bell,
 } from "lucide-react";
 import { Button } from "../../../components/common/Button";
 import { storage } from "../../../libs/storage";
@@ -126,24 +127,6 @@ export default function AdminDashboard() {
               Admin Dashboard
             </span>
           </button>
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:block text-right">
-              <p className="text-sm font-medium text-secondary-900">
-                {user?.name || "Admin"}
-              </p>
-              <p className="text-xs text-secondary-500">
-                {user?.email || "admin@example.com"}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-error-600"
-              onClick={handleLogout}
-            >
-              Đăng xuất
-            </Button>
-          </div>
         </div>
       </div>
 

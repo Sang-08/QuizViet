@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,7 +25,7 @@ import { mockAdapter } from "../../../mocks/adapter";
 
 const questionSchema = z.object({
   content: z.string().min(5, "Nội dung câu hỏi phải có ít nhất 5 ký tự"),
-  questionType: z.enum(["MultipleChoice", "TrueFalse", "FillInBlank"]),
+  questionType: z.enum(["MultipleChoice", "TrueFalse"]),
   timeLimit: z
     .number()
     .min(10, "Thời gian tối thiểu 10 giây")
@@ -62,7 +63,7 @@ interface Option {
 interface Question {
   id: string;
   content: string;
-  questionType: "MultipleChoice" | "TrueFalse" | "FillInBlank";
+  questionType: "MultipleChoice" | "TrueFalse";
   timeLimit: number;
   points: number;
   options: Option[];
@@ -73,6 +74,10 @@ export default function CreateQuiz() {
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [topics, setTopics] = useState<{ id: string; name: string }[]>([]);
+  const [folders, setFolders] = useState<
+    { id: string; name: string; parentId: string | null }[]
+  >([]);
 
   const {
     register,
@@ -88,23 +93,101 @@ export default function CreateQuiz() {
     },
   });
 
+  const navigate = useNavigate();
+
+  // Fetch topics and folders from API
+  useEffect(() => {
+    const fetchData = async () => {
+      const useMock = (import.meta as any).env?.VITE_USE_MOCK === "true";
+
+      try {
+        if (useMock) {
+          // Mock data - will be replaced by real API calls
+          setTopics([
+            { id: "1", name: "Toán học" },
+            { id: "2", name: "Vật lý" },
+            { id: "3", name: "Hóa học" },
+            { id: "4", name: "Lịch sử" },
+            { id: "5", name: "Địa lý" },
+            { id: "6", name: "Văn học" },
+          ]);
+
+          setFolders([
+            { id: "1", name: "Toán học lớp 10", parentId: null },
+            { id: "1-1", name: "Đại số", parentId: "1" },
+            { id: "1-2", name: "Hình học", parentId: "1" },
+            { id: "2", name: "Vật lý cơ bản", parentId: null },
+            { id: "2-1", name: "Cơ học", parentId: "2" },
+            { id: "2-2", name: "Điện học", parentId: "2" },
+            { id: "3", name: "Hóa học", parentId: null },
+            { id: "3-1", name: "Hóa vô cơ", parentId: "3" },
+            { id: "3-2", name: "Hóa hữu cơ", parentId: "3" },
+          ]);
+        } else {
+          // TODO: Replace with real API calls when .NET backend is ready
+          // const topicsResponse = await apiClient.get('/api/topics');
+          // setTopics(topicsResponse.data);
+
+          // const foldersResponse = await apiClient.get('/api/folders');
+          // setFolders(foldersResponse.data);
+
+          // Temporary: Use same mock data until API is ready
+          setTopics([
+            { id: "1", name: "Toán học" },
+            { id: "2", name: "Vật lý" },
+            { id: "3", name: "Hóa học" },
+            { id: "4", name: "Lịch sử" },
+            { id: "5", name: "Địa lý" },
+            { id: "6", name: "Văn học" },
+          ]);
+
+          setFolders([
+            { id: "1", name: "Toán học lớp 10", parentId: null },
+            { id: "1-1", name: "Đại số", parentId: "1" },
+            { id: "1-2", name: "Hình học", parentId: "1" },
+            { id: "2", name: "Vật lý cơ bản", parentId: null },
+            { id: "2-1", name: "Cơ học", parentId: "2" },
+            { id: "2-2", name: "Điện học", parentId: "2" },
+            { id: "3", name: "Hóa học", parentId: null },
+            { id: "3-1", name: "Hóa vô cơ", parentId: "3" },
+            { id: "3-2", name: "Hóa hữu cơ", parentId: "3" },
+          ]);
+        }
+      } catch (error) {
+        console.error("Error fetching topics and folders:", error);
+        // Set empty arrays on error
+        setTopics([]);
+        setFolders([]);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const isPrivate = watch("isPrivate");
 
-  const topics = [
-    { id: "1", name: "Toán học" },
-    { id: "2", name: "Vật lý" },
-    { id: "3", name: "Hóa học" },
-    { id: "4", name: "Lịch sử" },
-    { id: "5", name: "Địa lý" },
-    { id: "6", name: "Văn học" },
-  ];
+  // Function to render folders hierarchically with indentation
+  const renderFolderOptions = () => {
+    const result: JSX.Element[] = [];
 
-  const folders = [
-    { id: "1", name: "Thư mục mặc định" },
-    { id: "2", name: "Toán học" },
-    { id: "3", name: "Vật lý" },
-    { id: "4", name: "Hóa học" },
-  ];
+    const renderFolder = (folderId: string | null, level: number) => {
+      const subfolders = folders.filter((f) => f.parentId === folderId);
+      subfolders.forEach((folder) => {
+        const indent = "\u00A0\u00A0".repeat(level * 2); // Non-breaking spaces for indentation
+        result.push(
+          <option key={folder.id} value={folder.id}>
+            {indent}
+            {level > 0 ? "└─ " : ""}
+            {folder.name}
+          </option>
+        );
+        renderFolder(folder.id, level + 1);
+      });
+    };
+
+    renderFolder(null, 0);
+    return result;
+  };
 
   const onSubmit = async (data: QuizForm) => {
     setIsLoading(true);
@@ -231,8 +314,6 @@ export default function CreateQuiz() {
         return "Trắc nghiệm";
       case "TrueFalse":
         return "Đúng/Sai";
-      case "FillInBlank":
-        return "Điền từ";
       default:
         return type;
     }
@@ -320,11 +401,7 @@ export default function CreateQuiz() {
                     </label>
                     <select className="input" {...register("folderId")}>
                       <option value="">Chọn thư mục</option>
-                      {folders.map((folder) => (
-                        <option key={folder.id} value={folder.id}>
-                          {folder.name}
-                        </option>
-                      ))}
+                      {renderFolderOptions()}
                     </select>
                   </div>
                 </div>
@@ -566,7 +643,6 @@ function QuestionForm({ question, onSave, onCancel }: QuestionFormProps) {
           <select className="input" {...register("questionType")}>
             <option value="MultipleChoice">Trắc nghiệm</option>
             <option value="TrueFalse">Đúng/Sai</option>
-            <option value="FillInBlank">Điền từ</option>
           </select>
         </div>
 

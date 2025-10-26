@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Users, Clock } from "lucide-react";
+import { Users, Clock, X, AlertTriangle } from "lucide-react";
+import { Button } from "../../../components/common/Button";
+import { Modal } from "../../../components/common/Modal";
 
 interface Question {
   id: string;
@@ -15,9 +17,12 @@ export default function PlayLive() {
   const navigate = useNavigate();
   const { sessionId } = useParams();
 
-  // Detect if this is solo/practice mode (from preview) or live mode
+  // Detect mode:
+  // - solo-{quizId}: Solo/practice mode (from home page)
+  // - class-{classId}-{quizId}: Class quiz mode (from class page)
+  // - {sessionId}: Live multiplayer mode
   const isSoloMode = sessionId?.startsWith("solo-");
-  const quizId = isSoloMode ? sessionId?.replace("solo-", "") : null;
+  const isClassMode = sessionId?.startsWith("class-");
 
   // Mock quiz data - same as host
   const mockQuestions: Question[] = [
@@ -59,6 +64,7 @@ export default function PlayLive() {
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0); // Hidden from UI, will be shown in Results page
   const [streak, setStreak] = useState(0);
+  const [showExitModal, setShowExitModal] = useState(false);
 
   const currentQuestion = mockQuestions[currentQuestionIndex];
 
@@ -92,8 +98,8 @@ export default function PlayLive() {
       const isCorrect = answerIndex === currentQuestion.correctAnswer;
 
       if (isCorrect) {
-        // Simple scoring: 10 points per correct answer
-        setScore((prev) => prev + 10);
+        // Score based on question points set by teacher
+        setScore((prev) => prev + currentQuestion.points);
         setStreak((prev) => prev + 1);
       } else {
         setStreak(0);
@@ -111,15 +117,39 @@ export default function PlayLive() {
       setSelectedAnswer(null);
       setShowResult(false);
     } else {
-      // End quiz - go to appropriate results page
-      if (isSoloMode && quizId) {
-        // Solo/Practice mode - go to solo result (no leaderboard)
+      // End quiz - route based on mode
+      const isSoloMode = sessionId?.startsWith("solo-");
+
+      if (isSoloMode && sessionId) {
+        // Solo mode (from home page) → SoloResult (no leaderboard)
+        const quizId = sessionId.replace("solo-", "");
         navigate(`/quiz/result/${quizId}`);
       } else {
-        // Live mode - go to live result (with leaderboard)
+        // Class mode or Live mode → Result (with leaderboard)
         navigate(`/play/result/${sessionId}`);
       }
     }
+  };
+
+  const handleExit = () => {
+    setShowExitModal(true);
+  };
+
+  const confirmExit = () => {
+    const isSoloMode = sessionId?.startsWith("solo-");
+    const isClassMode = sessionId?.startsWith("class-");
+
+    if (isClassMode) {
+      navigate("/student/classes");
+    } else if (isSoloMode) {
+      navigate("/");
+    } else {
+      navigate("/play/join");
+    }
+  };
+
+  const cancelExit = () => {
+    setShowExitModal(false);
   };
 
   const answerColors = [
@@ -172,6 +202,17 @@ export default function PlayLive() {
         <div className="bg-black/30 backdrop-blur-md px-4 md:px-8 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
+              {/* Exit Button */}
+              <button
+                onClick={handleExit}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4" />
+                <span className="text-sm font-medium hidden md:inline">
+                  Thoát
+                </span>
+              </button>
+
               {streak > 0 && (
                 <div className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full">
                   <span className="text-sm font-bold">🔥 {streak} streak</span>
@@ -293,6 +334,38 @@ export default function PlayLive() {
           )}
         </div>
       </div>
+
+      {/* Exit Confirmation Modal */}
+      <Modal isOpen={showExitModal} onClose={cancelExit} title="Xác nhận thoát">
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-warning-100 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5 text-warning-600" />
+            </div>
+            <div>
+              <p className="text-secondary-900 font-medium mb-1">
+                Bạn có chắc muốn thoát?
+              </p>
+              <p className="text-sm text-secondary-600">
+                Tiến trình làm bài của bạn sẽ không được lưu lại. Bạn sẽ phải
+                bắt đầu lại từ đầu nếu muốn làm bài này.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end pt-4">
+            <Button variant="outline" onClick={cancelExit}>
+              Hủy
+            </Button>
+            <Button
+              onClick={confirmExit}
+              className="bg-error-600 hover:bg-error-700 text-white"
+            >
+              Thoát
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   BookOpen,
@@ -40,6 +41,7 @@ interface ClassQuiz {
 }
 
 export default function StudentClasses() {
+  const navigate = useNavigate();
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [joinCode, setJoinCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
@@ -83,6 +85,7 @@ export default function StudentClasses() {
           title: "Bài tập về nhà - Đại số",
           description: "Luyện tập các dạng bài tập đại số",
           isAssigned: false,
+          isCompleted: false,
           difficulty: "Hard",
         },
       ],
@@ -149,6 +152,18 @@ export default function StudentClasses() {
     alert(
       "Yêu cầu tham gia lớp đã được gửi (mock). Khi có BE sẽ thêm vào danh sách."
     );
+  };
+
+  const handleViewQuizDetail = (quizId: string, classId: string) => {
+    // Always show preview when clicking "View Details"
+    // Pass classId to indicate this quiz is from a class
+    navigate(`/quiz/preview/${quizId}?classId=${classId}`);
+  };
+
+  const handleViewResult = (quizId: string, classId: string) => {
+    // Navigate to result page with pattern: class-{classId}-{quizId}
+    // This will show the leaderboard for this class quiz
+    navigate(`/play/result/class-${classId}-${quizId}`);
   };
 
   return (
@@ -319,12 +334,26 @@ export default function StudentClasses() {
                       </div>
 
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleViewQuizDetail(quiz.id, selectedClassData.id)
+                          }
+                        >
                           <Eye className="w-4 h-4 mr-1" />
                           Xem chi tiết
                         </Button>
                         {quiz.isAssigned && !quiz.isCompleted && (
-                          <Button size="sm">
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleViewQuizDetail(
+                                quiz.id,
+                                selectedClassData.id
+                              )
+                            }
+                          >
                             <Play className="w-4 h-4 mr-1" />
                             Bắt đầu làm
                           </Button>
@@ -333,7 +362,10 @@ export default function StudentClasses() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-success-600"
+                            className="text-success-600 hover:bg-success-50"
+                            onClick={() =>
+                              handleViewResult(quiz.id, selectedClass!)
+                            }
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Đã hoàn thành

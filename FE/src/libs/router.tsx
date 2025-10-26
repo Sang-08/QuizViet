@@ -25,6 +25,7 @@ import TeacherClasses from "../app/routes/teacher/Classes";
 import StudentLayout from "../app/routes/student/layout";
 import StudentClasses from "../app/routes/student/Classes";
 import StudentHistory from "../app/routes/student/History";
+import QuizResultView from "../app/routes/student/QuizResultView";
 
 // Host/Play routes
 import HostLobby from "../app/routes/host/Lobby";
@@ -105,6 +106,10 @@ export const router = createBrowserRouter(
       children: [
         { index: true, element: <Navigate to="/" replace /> },
         { path: "classes", element: <StudentClasses /> },
+        {
+          path: "quiz/:quizId/result",
+          element: <QuizResultView />,
+        },
         { path: "history", element: <StudentHistory /> },
       ],
     },
@@ -151,6 +156,8 @@ export const router = createBrowserRouter(
         { path: "result/:sessionId", element: <PlayResult /> },
       ],
     },
+    // Shared lobby for both host and players (no role restriction)
+    { path: "/lobby/:sessionId", element: <HostLobby /> },
     { path: "/quiz/preview/:quizId", element: <QuizPreview /> },
     { path: "/quiz/result/:quizId", element: <SoloResult /> },
     { path: "/search", element: <BrowseQuizzes /> },
